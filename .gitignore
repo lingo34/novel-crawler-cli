@@ -3,6 +3,9 @@
 node_modules/*
 xsbk/*
 lab/*
+chromeTemp/*
+
 lab.js
 22.js
 jianshu.png
+note.md
