@@ -19,6 +19,28 @@
 
 所有本工具能爬取的数据皆为网络上的公开资料，如有版权纠纷，请联系数据来源。
 
+## 怎么用这玩意儿
+首先你需要
+1. 命令行
+2. Node.js (开发用的是v20.0.0, 其他版本没测试但应该问题不大吧...)
+3. npm (装node.js 时会一起获得)
+
+找个资料夹, clone 一下这个repo
+~~~ sh
+# clone 一下 这个repo
+https://github.com/lingo34/novel-crawler-cli
+
+# 然后 npm install 一下
+npm install
+~~~
+
+然后再用node 执行 index.js
+~~~sh
+node index.js
+~~~
+
+就可以了
+
 ## Supported Websites 目前支持的网站
 
 目前支持的网站
