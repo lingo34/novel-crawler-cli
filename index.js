@@ -45,7 +45,7 @@ async function getBook(url, startIndex, endIndex, dir)
     const browser = await puppeteer.launch(
         {
             headless: false, // 默认是无头模式，这里为了示范所以使用正常模式
-            args: ["--user-data-dir=./chromeTemp"]
+            //args: ["--user-data-dir=./chromeTemp"]
         }
     )
     console.log("浏览器已啟動, 获取书籍信息...")
@@ -54,6 +54,8 @@ async function getBook(url, startIndex, endIndex, dir)
     let bookname = bookInfo.bookname
     console.log("书籍信息:\n" + JSON.stringify(bookInfo, null, 4))
 
+    // ------ 传入参数格式化 ------
+
     // 格式化資料夾名稱
     // 如果dir目录不是以 / 结尾，添加 /
     if (dir[dir.length - 1] != "/") {
@@ -61,6 +63,13 @@ async function getBook(url, startIndex, endIndex, dir)
     }
     dir += bookname + '/' // 小说名稱資料夾
     console.log(`\n >> 小说将儲存到: (${dir})`)
+
+    // 如果不把 startIndex, endIndex 转换为数字，会出现错误, 例如 532 <= 2500 为 false
+    startIndex = parseInt(startIndex)
+    endIndex = parseInt(endIndex)
+
+
+    // ------ 传入参数格式化 end ------
 
     {
         n = prompt('按任意鍵繼續... 输入 n 退出')
@@ -81,8 +90,8 @@ async function getBook(url, startIndex, endIndex, dir)
         }
     })
 
-    // 如果从小说第一页开始爬取，添加 000 小说介绍文件
-    if(startIndex == 1)
+    // 如果从小说第一页开始爬取，添加 000 小说介绍文件, <= 1 是因为可以填负数
+    if(startIndex <= 1)
     {
         // 寫入 000 介绍檔案
         writeFile(`${dir}`, `000.txt`, JSON.stringify(bookInfo, null, 4), 
@@ -91,18 +100,29 @@ async function getBook(url, startIndex, endIndex, dir)
 
     // 控制浏览器打开新标签页面
     const page = await browser.newPage()
+    console.log("标签页已啟動, 开始爬取小说内容...")
 
+    // ? debug --------------------------------
+
+    console.log(`startIndex = ${startIndex} endIndex = ${endIndex}`)
+    console.log(`typeof startIndex = ${typeof startIndex} endIndex = ${typeof endIndex}, for if else is ${startIndex <= endIndex}`)
     
     // 循环爬取小说每一章
-    await page.goto(url)
-    for(let pageNum = startIndex; pageNum <= endIndex; pageNum++)
+    for(pageNum = startIndex; pageNum <= endIndex; pageNum++)
     {
+        // 前往章节页面
+        await page.goto(url).catch(err => {
+            console.error(` #####! <-- ${dir} 第${pageNum}章 访问失败 !!!!!  退出程序...######`)
+            console.log(` url為: ${url} index 為: ${pageNum}\n`)
+            console.log(err)
+            return;
+        })
         // ---- A Page ----
         let data = null; // store the data of the page, js object, {content, title, nextPageUrl}
         // 在新标签中打开要爬取的网页
 
         // 如果出错，要重試10次
-        for(let errCount = 0; errCount < 10; errCount++)
+        for(errCount = 0; errCount < 10; errCount++)
         {
             if(errCount > 9)
             {
@@ -133,8 +153,6 @@ async function getBook(url, startIndex, endIndex, dir)
             
             break;
         }
-
-
     
         // 寫入檔案
         //          (目录位置/, 檔案名稱, 檔案內容, 成功訊息, 失敗訊息)
@@ -144,7 +162,14 @@ async function getBook(url, startIndex, endIndex, dir)
                     ` #####! <-- ${dir}/ 第${pageNum}章: 寫入錯誤或data為空 !!!!!  退出程序...######`)
         
         // 前往下一页
-        await page.goto(data.nextPageUrl)
+        url = data.nextPageUrl;
+        
+        if(url == null || url == bookInfo.homeUrl)
+        {
+            console.log(` #####! <-- 爬取完畢, 本页是目录页: url == "${url}."  退出程序...######`)
+            return;
+        }
+
         //await sleep(200);
     }
 
