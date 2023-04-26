@@ -126,7 +126,7 @@ async function getBook(url, startIndex, endIndex, dir)
                     console.log(" #####! <-- 爬取完畢, 本页是目录页: home url.  退出程序...######")
                     return;
                 }
-                console.error(` #####! <-- ${dir} 第${pageNum}章: ${data.title} 爬取失敗，正在重試... ${errCount+1}/10`)
+                console.error(` #####! <-- ${dir} 第${pageNum}章 爬取失敗，正在重試... ${errCount+1}/10`)
                 await page.reload();
                 continue;
             }
