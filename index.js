@@ -133,6 +133,7 @@ async function getBook(url, startIndex, endIndex, dir)
 
             try{
                 // 使用evaluate方法在浏览器中执行传入函数（完全的浏览器环境，所以函数内可以直接使用window、document等所有对象和方法）
+                //! =================== 此处应被替换为hjson ===================
                 data = await page.evaluate(() => {
                     
                     let content = document.querySelector('#content').innerHTML; // 获取小说内容
@@ -204,6 +205,7 @@ async function getBookInfo(browser, chapterUrl)
 
     try{
         // 使用evaluate方法在浏览器中执行传入函数
+        // ! ==================== 应被替换为 hjson get book info ====================
         data = await page.evaluate(() => {
             let bookname = document.querySelector('#info h1').innerHTML; // 获取小说名字
             let img = document.querySelector('#fmimg img').src; // 获取小说封面

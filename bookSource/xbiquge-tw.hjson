@@ -1,0 +1,32 @@
+{
+    bookSource: "笔趣阁", // 书源名称
+    bookSourceUrl: "https://www.xbiquge.tw",
+
+    // 尚不支持搜索
+    //searchUrl: "https://www.xbiquge.tw/search.php?keyword={key}",
+    //bookUrl: "https://www.xbiquge.tw/{bookId}/",
+
+    // 获取书籍信息
+    getBookInfo:
+    '''
+        function getBookInfo(document){
+            let bookname = document.querySelector('#info h1').innerHTML; // 获取小说名字
+            let img = document.querySelector('#fmimg img').src; // 获取小说封面
+            let author = document.querySelector('#info p').textContent; // 获取小说作者
+            let intro = document.querySelector('#intro').innerHTML; // 获取小说简介
+            return {bookname, img, author, intro}
+        }
+    ''',
+
+    getContent:
+    '''
+        function getContent(document) 
+        {
+            let content = document.querySelector('#content').innerHTML; // 获取小说内容 
+            let title = document.querySelector('.bookname h1').innerHTML; // 获取小说标题 
+            let nextPageUrl = document.getElementById('link-next').href; // 获取下一页的链接 
+            return {content, title, nextPageUrl} 
+        }
+    '''
+
+}
