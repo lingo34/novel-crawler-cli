@@ -67,6 +67,7 @@ node index.js
 - [ ] 拆分并模块化html解析模块
 - [ ] 弄一种匹配机制，如果是已适配的网站，直接用对应库，否则警告后尝试
 - [ ] 适配更多网站，或尝试适配书源语法
+- [ ] 解决必须提供第一章url的问题, 或者说, 支持提供目录url
 
 为webui 做准备
 
@@ -90,7 +91,7 @@ GitHub Copilot
 - 帮我写了剩下 1/3 的代码
 
 ## 使用的 Library
-- puppeteer
-- prompt-sync
+- puppeteer, Apache 2.0 协议
+- prompt-sync, mit 协议
 - 
 
