@@ -1,3 +1,5 @@
+> :warning: If you don't understand Chinese, this repo is useless for you.
+> This program aims to crawl Chinese novel websites, so almost everything (like comments) is written in Chinese
 
 ## 这是啥
 这是年轻人的第一个爬虫项目, 是一个基于Node.JS 与puppeteer的纯命令行软件，以爬取免费小说网站上的免费小说资源。
@@ -79,7 +81,6 @@ node index.js
 
 
 
-
 ## 致谢
 [node.js爬虫入门（二）爬取动态页面(puppeteer)](https://peal.cc/blog/3)
 - 教会了我怎么写爬虫, 贡献了 1/3 的代码
@@ -94,4 +95,14 @@ GitHub Copilot
 - puppeteer, Apache 2.0 协议
 - prompt-sync, mit 协议
 - 
+
+
+
+## 一些别的
+
+小说文件名
+
+
+
+
 

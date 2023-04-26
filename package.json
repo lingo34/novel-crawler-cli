@@ -9,6 +9,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "hjson": "^3.2.2",
     "prompt-sync": "^4.2.0",
     "puppeteer": "^19.11.1"
   }

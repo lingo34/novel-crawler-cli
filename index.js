@@ -1,7 +1,8 @@
+const fs = require('fs');
 const puppeteer = require('puppeteer');
 const prompt = require('prompt-sync')()
+var Hjson = require('hjson');
 
-const fs = require('fs');
 main()
 
 // 測試數據
@@ -41,6 +42,7 @@ async function getBook(url, startIndex, endIndex, dir)
 {
     
     console.log("获取书籍信息, 启动浏览器...")
+    
     // 启动浏览器
     const browser = await puppeteer.launch(
         {
@@ -48,15 +50,37 @@ async function getBook(url, startIndex, endIndex, dir)
             //args: ["--user-data-dir=./chromeTemp"]
         }
     )
+
+    
+
+    // ------ 传入参数初始化/格式化 ------
+
+    // 1. 根据url 判断书源
+    // ! 不过这里的书源只有一种，所以不需要判断
+    let bookSource = null; // 书源 json, {bookSourceName, bookSourceUrl, getBookInfo, getBookContent}
+    console.log("获取书源...")
+
+    bookSource = Hjson.parse(fs.readFileSync('bookSource/xbiquge-tw.hjson', 'utf8'))
+    console.log("\n书源: " + JSON.stringify(bookSource, null, 4) + "\n\n")
+
+    // 将 json 中的两个 函数字符串转换为可执行函数
+    // 但这两个函数字符串转换必须要放在 下面的 page.evaluate 回调函数中，否则会报错
+    // bookSource.getBookInfo = new Function(bookSource.getBookInfo.arguments, bookSource.getBookInfo.body);
+    // bookSource.getContent = new Function(bookSource.getContent.arguments, bookSource.getContent.body);
+    // 不过转换个 test 无伤大雅
+    bookSource.test = new Function(bookSource.test.arguments, bookSource.test.body);
+
     console.log("浏览器已啟動, 获取书籍信息...")
-    // 獲取書籍資訊, js object, {bookname, img, author, intro, homeUrl}
-    let bookInfo = await getBookInfo(browser, url) 
+    
+    
+    // 2. 獲取書籍資訊, js object, {bookname, img, author, intro, homeUrl}
+    let bookInfo = await getBookInfo(browser, bookSource, url) 
     let bookname = bookInfo.bookname
     console.log("书籍信息:\n" + JSON.stringify(bookInfo, null, 4))
 
-    // ------ 传入参数格式化 ------
 
-    // 格式化資料夾名稱
+
+    // 3. 格式化資料夾名稱
     // 如果dir目录不是以 / 结尾，添加 /
     if (dir[dir.length - 1] != "/") {
         dir += '/'
@@ -134,13 +158,14 @@ async function getBook(url, startIndex, endIndex, dir)
             try{
                 // 使用evaluate方法在浏览器中执行传入函数（完全的浏览器环境，所以函数内可以直接使用window、document等所有对象和方法）
                 //! =================== 此处应被替换为hjson ===================
-                data = await page.evaluate(() => {
+                data = await page.evaluate((bookSource) => {
                     
-                    let content = document.querySelector('#content').innerHTML; // 获取小说内容
-                    let title = document.querySelector('.bookname h1').innerHTML; // 获取小说标题
-                    let nextPageUrl = document.getElementById("link-next").href; // 获取下一页的链接
-                    return {content, title, nextPageUrl}
-                })
+                    // let content = document.querySelector('#content').innerHTML; // 获取小说内容
+                    // let title = document.querySelector('.bookname h1').innerHTML; // 获取小说标题
+                    // let nextPageUrl = document.getElementById("link-next").href; // 获取下一页的链接
+                    bookSource.getContent = new Function(bookSource.getContent.arguments, bookSource.getContent.body);
+                    return bookSource.getContent(document);
+                }, bookSource)
             } catch (err) {
                 if(page.url() == bookInfo.homeUrl)
                 {
@@ -189,8 +214,9 @@ async function getBook(url, startIndex, endIndex, dir)
 
 // 获取小说封面、作者、简介，并生成 000 小说介绍文件所需的字符串
 // 返回 {bookname, img, author, intro, homeUrl}
-async function getBookInfo(browser, chapterUrl)
+async function getBookInfo(browser, bookSource, chapterUrl)
 {
+    
     // get home url
     var arr = chapterUrl.split("/");
     arr.pop();
@@ -205,14 +231,25 @@ async function getBookInfo(browser, chapterUrl)
 
     try{
         // 使用evaluate方法在浏览器中执行传入函数
-        // ! ==================== 应被替换为 hjson get book info ====================
-        data = await page.evaluate(() => {
-            let bookname = document.querySelector('#info h1').innerHTML; // 获取小说名字
-            let img = document.querySelector('#fmimg img').src; // 获取小说封面
-            let author = document.querySelector('#info p').textContent; // 获取小说作者
-            let intro = document.querySelector('#intro').innerHTML; // 获取小说简介
-            return {bookname, img, author, intro}
-        })
+        // ? ==================== 应被替换为 hjson get book info ====================
+        data = await page.evaluate((bookSource) => {
+            // let bookname = document.querySelector('#info h1').innerHTML; // 获取小说名字
+            // let img = document.querySelector('#fmimg img').src; // 获取小说封面
+            // let author = document.querySelector('#info p').textContent; // 获取小说作者
+            // let intro = document.querySelector('#intro').innerHTML; // 获取小说简介
+            // return {bookname, img, author, intro}
+
+            // 书源中的函数，用于获取小说信息
+            // ## 为什么必须要在 page.evaluate 内部进行 JSON 函数的转换？
+            // 大概是因为page.evaluate的js代码是在浏览器中执行的，而不是在nodejs中执行的
+            // 如果有传递参数, 比如这里的 bookSource (object), 会被转换成 JSON string
+            // 但是 JSON 不能传递函数, JSON string 中的函数是不能被执行的
+            // 所以不能在 page.evaluate 外面把书源JSON提供的string格式函数提前转换成可执行函数再进来
+            // 要在 page.evaluate 内部把书源JSON提供的string格式函数转换成可执行函数函数
+            bookSource.getBookInfo = new Function(bookSource.getBookInfo.arguments, bookSource.getBookInfo.body);
+
+            return bookSource.getBookInfo(document); // 调用书源中的函数来获取小说信息， 传入document对象
+        }, bookSource)
     } catch (err) {
         console.error(` #####! <-- 000 介绍文件 爬取失敗，正在报错...`)
         throw err;
