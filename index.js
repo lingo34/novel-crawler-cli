@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 const puppeteer = require('puppeteer');
 const prompt = require('prompt-sync')()
 var Hjson = require('hjson');
@@ -30,15 +31,33 @@ async function main()
         dir = './'
     }
     console.log(`小说将儲存到: ${dir}小说名/`)
+
+    // 书源文件
+    let bookSourceName;
+    // 列出所有书源文件
+    console.log("\n>> 列出所有书源文件 << \n")
+    fs.readdirSync('./bookSource', (err, files) => {
+        if (err) {
+          console.error(err);
+          return;
+        }
+        files.forEach(file => {
+          console.log(file);
+        });
+    });
     
-    await getBook(url, startIndex, endIndex, dir)
+    bookSourceName = prompt('請指定书源文件, 不指定则根据url自动匹配: ')
+    // bookSourceName = './bookSource/' + bookSourceName
+    console.log(`书源文件: ${'./bookSource/' + bookSourceName}`)
+    
+    await getBook(url, startIndex, endIndex, dir, bookSourceName)
 }
 
 
 
 // this function crawl the content of a novel
-// url: 網址, startIndex: 起始章節, endIndex: 結束章節, dir: 存放資料夾, 地址带/结尾
-async function getBook(url, startIndex, endIndex, dir)
+// url: 網址, startIndex: 起始章節, endIndex: 結束章節, dir: 存放資料夾, 地址带/结尾, bookSourceDir: 书源文件路径
+async function getBook(url, startIndex, endIndex, dir, bookSourceName)
 {
     
     console.log("获取书籍信息, 启动浏览器...")
@@ -56,11 +75,20 @@ async function getBook(url, startIndex, endIndex, dir)
     // ------ 传入参数初始化/格式化 ------
 
     // 1. 根据url 判断书源
+    let bookSourcePath = null;
+    if(bookSourceName == '' || !bookSourceName)
+    {
+        bookSourcePath = await deduceBookSourceFromUrl(url, "./bookSource")
+    } else {
+        bookSourcePath = './bookSource/' + bookSourceName;
+    }
+    
+    console.log("书源文件: " + bookSourcePath)
     // ! 不过这里的书源只有一种，所以不需要判断
-    let bookSource = null; // 书源 json, {bookSourceName, bookSourceUrl, getBookInfo, getBookContent}
+    bookSource = null; // 书源 json, {bookSourceName, bookSourceUrl, getBookInfo, getBookContent}
     console.log("获取书源...")
 
-    bookSource = Hjson.parse(fs.readFileSync('bookSource/xbiquge-tw.hjson', 'utf8'))
+    bookSource = Hjson.parse(fs.readFileSync(bookSourcePath, 'utf8'))
     console.log("\n书源: " + JSON.stringify(bookSource, null, 4) + "\n\n")
 
     // 将 json 中的两个 函数字符串转换为可执行函数
@@ -211,6 +239,25 @@ async function getBook(url, startIndex, endIndex, dir)
 
 
 //! ---- Novel Tools ----
+// 根据小说目录页的url，推断小说源, 并返回小说源文件的相对路径, 如果找不到，返回null
+async function deduceBookSourceFromUrl(url, bookSourceDir) //!! 未完成 ================================== OOOOO
+{
+    url = new URL(url);
+    
+    // 从小说目录页的url推断小说源
+    // ? 我想删除子域名, 只搜索主域名, 但是不知道怎么做
+    let host = url.hostname.replace("www.", "");
+
+    let bookSource = findStringInFiles(bookSourceDir, host)[0]
+    if(!bookSource || bookSource == "")
+    {
+        console.error(" #####! <-- 未找到匹配的小说源, 退出程序...######")
+        return null;
+    }
+    return bookSource;
+}
+
+
 
 // 获取小说封面、作者、简介，并生成 000 小说介绍文件所需的字符串
 // 返回 {bookname, img, author, intro, homeUrl}
@@ -286,7 +333,30 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-
+// 递归查找目录下的所有文件中是否包含指定字符串
+// 返回包含指定字符串的文件路径数组
+function findStringInFiles(dir, str) 
+{
+    const files = fs.readdirSync(dir);
+    const result = [];
+  
+    files.forEach(file => {
+      const filePath = path.join(dir, file);
+      const stat = fs.statSync(filePath);
+  
+      if (stat.isDirectory()) {
+        result.push(...findStringInFiles(filePath, str));
+      } else if (stat.isFile() && path.extname(file) === '.hjson') {
+        const content = fs.readFileSync(filePath, 'utf8');
+  
+        if (content.indexOf(str) !== -1) {
+          return result.push(filePath);
+        }
+      }
+    });
+  
+    return result;
+  }
 
 // 封装fs.writeFile
 // dir: 檔案目录, fileName: 檔案名稱, data: 檔案內容, successMessage: 成功訊息, errMessage: 失敗訊息
