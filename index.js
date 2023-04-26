@@ -56,7 +56,8 @@ async function main()
 
 
 // this function crawl the content of a novel
-// url: 網址, startIndex: 起始章節, endIndex: 結束章節, dir: 存放資料夾, 地址带/结尾, bookSourceDir: 书源文件路径
+// url: 網址, startIndex: 起始章節, endIndex: 結束章節, 
+// dir: 存放資料夾, 地址带/结尾, bookSourceDir: 书源文件路径, 为空则根据url自动匹配
 async function getBook(url, startIndex, endIndex, dir, bookSourceName)
 {
     
@@ -77,14 +78,20 @@ async function getBook(url, startIndex, endIndex, dir, bookSourceName)
     // 1. 根据url 判断书源
     let bookSourcePath = null;
     if(bookSourceName == '' || !bookSourceName)
-    {
-        bookSourcePath = await deduceBookSourceFromUrl(url, "./bookSource")
-    } else {
+    { // 未指定书源文件
+        console.log("未指定书源文件，根据url自动匹配...")
+        try {
+            bookSourcePath = await deduceBookSourceFromUrl(url, "./bookSource")
+        } catch (error) {
+            console.log(">> 根据url自动匹配书源失败，退出程序... <<")
+            console.log(error)
+            return;
+        }
+    } else { // 指定书源文件
         bookSourcePath = './bookSource/' + bookSourceName;
     }
     
     console.log("书源文件: " + bookSourcePath)
-    // ! 不过这里的书源只有一种，所以不需要判断
     bookSource = null; // 书源 json, {bookSourceName, bookSourceUrl, getBookInfo, getBookContent}
     console.log("获取书源...")
 
