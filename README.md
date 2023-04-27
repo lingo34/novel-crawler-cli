@@ -96,7 +96,7 @@ GitHub Copilot
 ## 使用的 Library
 - puppeteer, Apache 2.0 协议
 - prompt-sync, mit 协议
-- 
+- hjson, mit 协议
 
 
 
