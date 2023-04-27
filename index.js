@@ -4,6 +4,8 @@ const puppeteer = require('puppeteer');
 const prompt = require('prompt-sync')()
 var Hjson = require('hjson');
 
+const version = "1.0.0"
+
 main()
 
 // 測試數據
@@ -27,7 +29,7 @@ async function main() {
     if (dir == '') {
         dir = './'
     }
-    console.log(`小说将儲存到: ${dir}小说名/`)
+    // console.log(`小说将儲存到: ${dir}小说名/`)
 
     // 书源文件
     let bookSourceName;
@@ -125,6 +127,10 @@ async function getBook(url, startIndex, endIndex, dir, bookSourceName) {
     // 2. 獲取書籍資訊, js object, {bookname, img, author, intro, homeUrl}
     let bookInfo = await getBookInfo(browser, bookSource, url)
     let bookname = bookInfo.bookname
+
+    bookInfo.bookSourceVersion = bookSource.version // 往书籍信息中添加书源版本号
+    bookInfo.crawlerVersion = `lingo34/novel-crawler-cli:v${version}` // 往书籍信息中添加本软件版本号
+    
     console.log("书籍信息:\n" + JSON.stringify(bookInfo, null, 4))
 
 
@@ -158,7 +164,7 @@ async function getBook(url, startIndex, endIndex, dir, bookSourceName) {
     // })
 
     try {
-        fs.mkdirSync(`${dir}`) // 创建小说名稱資料夾
+        fs.mkdirSync(`${dir}`, { recursive: true }) // 创建小说名稱資料夾
         console.log(`创建目录"${dir}"成功。`)
     } catch (error) {
         if(error.code == 'EEXIST')
@@ -171,7 +177,7 @@ async function getBook(url, startIndex, endIndex, dir, bookSourceName) {
     }
 
 
-
+    // 写入 000 介绍檔案
     // 如果从小说第一页开始爬取，添加 000 小说介绍文件, <= 1 是因为可以填负数
     if (startIndex <= 1) {
         console.log("创建 000 介绍文件...")
@@ -181,6 +187,7 @@ async function getBook(url, startIndex, endIndex, dir, bookSourceName) {
             ` --> ${bookInfo.bookname} / 000 介绍文件 已儲存`, ` #####! <-- 000 介绍文件寫入錯誤 !!!!!  退出程序...######`)
     }
 
+    // 爬取書籍內容
     // 控制浏览器打开新标签页面
     const page = await browser.newPage()
     console.log("标签页已啟動, 开始爬取小说内容...")

@@ -42,7 +42,7 @@
         '''
     },
 
-    // !将获取到的小说正文(content)内容进行处理的函数,
+    // 将获取到的小说正文(content)内容进行处理的函数,
     formatContentText:
     {
         arguments: "content",
