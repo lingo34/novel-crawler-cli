@@ -50,10 +50,11 @@ node index.js
 ## Supported Websites 目前支持的网站
 
 目前支持的网站
-| url | name |
-| --- | ---- |
-| https://www.xbiquge.tw/   | 笔趣阁    |
-| https://www.shukw.com/    | 书库网    |
+| url | name | 书源档案 |
+| --- | ---- | ------ |
+| https://www.xbiquge.tw/   | 笔趣阁    | xbiquge-tw.hjson      |
+| https://www.shukw.com/    | 书库网    | shukw-com.hjson       |
+| https://www.bifengzw.com  | 东流小说  | bifengzw-com.hjson    |
 
 打算支持的网站
 - ...更多笔趣阁
