@@ -2,12 +2,43 @@
     bookSourceName: "书库网", // 书源名称
     bookSourceUrl: "http://www.shukw.com",
 
+    // homeUrl: "http://www.shukw.com/book/{bookid}", // 书源网站的目录页地址, 用于跳转至目录页
+
+
     // http://www.shukw.com
     // http://www.shukw.com/read/106180/32208162.html
 
     // 尚不支持搜索
-    //searchUrl: "https://www.xbiquge.tw/search.php?keyword={key}",
+    //searchUrl: "http://www.shukw.com/search.php?keyword={key}", // 书源网站的搜索页地址, 用于跳转至搜索页
     //bookUrl: "https://www.xbiquge.tw/{bookId}/",
+
+    // ======== 工具函数 ========
+
+    // 从章节url 中提取 bookid 的正则表达式
+    getBookID:
+    {
+        arguments:"url", // 传入的参数, 第一章或某一章的url, 请不要动这玩意儿
+        body:
+        '''
+            // 此处是函数体, 本函数应该透过解析传入的参数: url, 即章节内的url, 
+            // 来提取 book id 并回传
+            return url.match(/\/(\d+)\//)[1];
+        '''
+
+    },
+    
+    // 从book id 获取 home 的函数
+    getHomeUrl:
+    {
+        arguments: "bookid",
+        body:
+        '''
+            let homeUrl = "http://www.shukw.com/book/" + bookid;
+            return homeUrl;
+        '''
+    },
+
+    // ======== Evaluate 函数 - 用于分析网页 ========
 
     // 获取书籍信息
     getBookInfo:
@@ -35,7 +66,7 @@
         body:
         '''
             let content = document.querySelector('#booktxt').textContent; // 获取小说内容 
-            let title = document.querySelector('.bookname h1').innerHTML; // 获取小说标题 
+            let title = document.querySelector('.bookname').innerHTML; // 获取小说标题 
             let nextPageUrl = document.getElementById('next_url').href; // 获取下一页的链接 
             return {content, title, nextPageUrl} 
         ''', // 函数体, 这里存放 爬虫代码, 需要使用 document (就是浏览器中的document对象) 以及css 选择器来获取数据

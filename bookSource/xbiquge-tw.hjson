@@ -6,6 +6,35 @@
     //searchUrl: "https://www.xbiquge.tw/search.php?keyword={key}",
     //bookUrl: "https://www.xbiquge.tw/{bookId}/",
 
+
+    // ======== 工具函数 ========
+
+    // 从章节url 中提取 bookid 的正则表达式
+    getBookID:
+    {
+        arguments:"url", // 传入的参数, 第一章或某一章的url, 请不要动这玩意儿
+        body:
+        '''
+            // 此处是函数体, 本函数应该透过解析传入的参数: url, 即章节内的url, 
+            // 来提取 book id 并回传
+            return url.match(/\/(\d+)\//)[1];
+        '''
+
+    },
+    // 从book id 获取 home 的函数
+    getHomeUrl:
+    {
+        arguments: "bookid",
+        body:
+        '''
+            let homeUrl = "https://www.xbiquge.tw/book/" + bookid;
+            return homeUrl;
+        '''
+    },
+
+
+    // ======== Evaluate 函数 - 用于分析网页 ========
+
     // 获取书籍信息
     getBookInfo:
     {

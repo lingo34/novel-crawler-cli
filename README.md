@@ -52,7 +52,8 @@ node index.js
 目前支持的网站
 | url | name |
 | --- | ---- |
-| https://www.xbiquge.tw/ | 笔趣阁 |
+| https://www.xbiquge.tw/   | 笔趣阁    |
+| https://www.shukw.com/    | 书库网    |
 
 打算支持的网站
 - ...更多笔趣阁
