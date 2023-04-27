@@ -26,19 +26,7 @@
 如果想创建新的书源, 可以参考我创建的第一个书源 `xbiquge-tw.hjson`
 里面有注释
 
-~~~ hjson
-    getContent:
-    {
-        arguments:"document",
-        body:
-        '''
-            let content = document.querySelector('#content').innerHTML; // 获取小说内容 
-            let title = document.querySelector('.bookname h1').innerHTML; // 获取小说标题 
-            let nextPageUrl = document.getElementById('link-next').href; // 获取下一页的链接 
-            return {content, title, nextPageUrl} 
-        ''',
-    }
-~~~
+我个人推荐你直接复制一份, 然后根据注释, 修改文件
 
 
 ## 实现这个功能参考的相关文档 (因此不包括copilot 或bingGPT 或 chatGPT)
