@@ -12,6 +12,8 @@ main()
 // getBook("https://www.xbiquge.tw/book/54510/38637143.html", '风起龙城')
 
 async function main() {
+    console.log("Novel-Crawler 爬虫 v" + version)
+    console.log("GitHub: https://github.com/lingo34/novel-crawler-cli")
     let url = prompt('請輸入开始章节網址: ')
     if (url == '') {
         console.log("url為空，退出程序...")
@@ -71,6 +73,7 @@ async function getBook(url, startIndex, endIndex, dir, bookSourceName) {
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-blink-features=AutomationControlled',
+                'timeout=60000'
             ],
             dumpio: false,
         }
