@@ -1,6 +1,9 @@
 {
+    version: "1.0.0", // 书源版本
+
+
     bookSourceName: "笔趣阁", // 书源名称
-    bookSourceUrl: "https://www.xbiquge.tw",
+    bookSourceUrl: "https://www.xbiquge.tw", // 书源网站地址
 
     // 尚不支持搜索
     //searchUrl: "https://www.xbiquge.tw/search.php?keyword={key}",
@@ -32,6 +35,27 @@
         '''
     },
 
+    // 将获取到的小说正文(content)内容进行处理的函数,
+    formatContentText:
+    {
+        arguments: "content",
+        body:
+        '''
+            // 本函数用于处理获取到的小说正文内容, 例如去除广告, 去除多余的空行等等
+            // 本函数应该透过解析传入的参数: content, 即小说正文内容, 
+            // 来处理并回传处理后的小说正文内容
+
+            // 删除首尾空白
+            content = content.trim();
+            // 將 &nbsp; 轉換為空格
+            content = content.replace(/&nbsp;/g, "");
+            // 刪除首行水印
+            content = content.replace(/^.*笔趣阁 www\.xbiquge\.tw，最快更新.+?！\s*/, '');
+
+            return content;
+        '''
+    }
+
 
     // ======== Evaluate 函数 - 用于分析网页 ========
 
@@ -60,8 +84,8 @@
         arguments:"document", // 传入的参数, 是从evaluate那边获取的页面的document 对象, 请不要动这玩意儿
         body:
         '''
-            let content = document.querySelector('#content').innerHTML; // 获取小说内容 
-            let title = document.querySelector('.bookname h1').innerHTML; // 获取小说标题 
+            let content = document.querySelector('#content').textContent; // 获取小说内容 
+            let title = document.querySelector('.bookname h1').textContent; // 获取小说标题 
             let nextPageUrl = document.getElementById('link-next').href; // 获取下一页的链接 
             return {content, title, nextPageUrl} 
         ''', // 函数体, 这里存放 爬虫代码, 需要使用 document (就是浏览器中的document对象) 以及css 选择器来获取数据

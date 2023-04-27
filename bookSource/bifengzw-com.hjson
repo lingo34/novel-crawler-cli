@@ -2,22 +2,23 @@
     version: "1.0.0", // 书源版本
 
 
-    bookSourceName: "书库网", // 书源名称
-    bookSourceUrl: "http://www.shukw.com", // 书源网站地址
+    bookSourceName: "东流小说", // 书源名称
+    bookSourceUrl: "https://www.bifengzw.com", // 书源网站地址
 
-    // homeUrl: "http://www.shukw.com/book/{bookid}", // 书源网站的目录页地址, 用于跳转至目录页
+    // homeUrl: "https://www.bifengzw.com/read/{bookid}", // 书源网站的目录页地址, 用于跳转至目录页
 
 
-    // http://www.shukw.com
-    // http://www.shukw.com/read/106180/32208162.html
+    // https://www.bifengzw.com/
+    // https://www.bifengzw.com/read/AgZZBQVd.html
 
     // 尚不支持搜索
-    //searchUrl: "http://www.shukw.com/search.php?keyword={key}", // 书源网站的搜索页地址, 用于跳转至搜索页
-    //bookUrl: "https://www.xbiquge.tw/{bookId}/",
+    //searchUrl: "", // 书源网站的搜索页地址, 用于跳转至搜索页
+    //bookUrl: "https://www.bifengzw.com/read/{bookId}/",
 
     // ======== 工具函数 ========
 
     // 从章节url 中提取 bookid 的正则表达式
+    // 如果这个函数出错, 会导致无法正确的获得book id, 导致无法跳转至目录页, 并在获取小说信息时报错
     getBookID:
     {
         arguments:"url", // 传入的参数, 第一章或某一章的url, 请不要动这玩意儿
@@ -25,18 +26,18 @@
         '''
             // 此处是函数体, 本函数应该透过解析传入的参数: url, 即章节内的url, 
             // 来提取 book id 并回传
-            return url.match(/\/(\d+)\//)[1];
+            return url.match(/\/read\/(\w+)\/\d+\.html/)[1];
         '''
 
     },
     
-    // 从book id 获取 home 的函数
+    // 从book id 获取 homeUrl 的函数
     getHomeUrl:
     {
         arguments: "bookid",
         body:
         '''
-            let homeUrl = "http://www.shukw.com/book/" + bookid;
+            let homeUrl = "https://www.bifengzw.com/read/" + bookid + ".html";
             return homeUrl;
         '''
     },
@@ -71,10 +72,11 @@
             // 此处是函数体, 这里存放爬虫代码, 需要使用 document (就是浏览器中的document对象) 以及css 选择器来获取数据
             // 获取并透过 return 返回以下数据: {bookname, img, author, intro}
 
-            let bookname = document.querySelector('#info h1').textContent; // 获取小说名字
-            let img = document.querySelector('#fmimg img').src; // 获取小说封面
-            let author = document.querySelector('#info p').textContent; // 获取小说作者
-            let intro = document.querySelector('#intro').textContent; // 获取小说简介
+            let bookname = document.querySelector('.bookinfo h1').textContent; // 获取小说名字
+            let img = document.querySelector('.bookcover img').src; // 获取小说封面
+            let author = document.querySelector('body > section:nth-child(4) > div > div.bookinfo.col-lg-9.col-md-9.col-sm-12.col-xs-12 > div.info.col-lg-9.col-md-9.col-sm-9.col-xs-8 > table > tbody > tr:nth-child(2) > td')
+                        .textContent; // 获取小说作者
+            let intro = document.querySelector('.intro').textContent; // 获取小说简介
             return {bookname, img, author, intro}
             
         '''
@@ -87,9 +89,9 @@
         arguments:"document", // 传入的参数, 是从evaluate那边获取的页面的document 对象, 请不要动这玩意儿
         body:
         '''
-            let content = document.querySelector('#booktxt').textContent; // 获取小说内容 
-            let title = document.querySelector('.bookname').textContent; // 获取小说标题 
-            let nextPageUrl = document.getElementById('next_url').href; // 获取下一页的链接 
+            let content = document.querySelector('.content').textContent; // 获取小说内容 
+            let title = document.querySelector('#content h1').textContent; // 获取小说标题 
+            let nextPageUrl = document.querySelector('#content > div.page.hidden-xs.hidden-sm > a:nth-child(3)').href; // 获取下一页的链接 
             return {content, title, nextPageUrl} 
         ''', // 函数体, 这里存放 爬虫代码, 需要使用 document (就是浏览器中的document对象) 以及css 选择器来获取数据
             // 获取并透过 return 返回以下数据: (content, title, nextPageUrl)
