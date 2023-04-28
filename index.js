@@ -70,7 +70,7 @@ async function getBook(url, startIndex, endIndex, dir, bookSourceName) {
             //args: ["--user-data-dir=./chromeTemp"]
             args: [
                 // "--user-data-dir=./chromeTemp" // 保存登录状态
-                '--no-sandbox',
+                // '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-blink-features=AutomationControlled',
             ],
