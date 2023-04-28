@@ -1,9 +1,11 @@
 {
-    version: "1.0.0", // 书源版本
+    version: "1.0.1", // 书源版本
 
 
     bookSourceName: "东流小说", // 书源名称
     bookSourceUrl: "https://www.bifengzw.com", // 书源网站地址
+
+    note: "", // 书源备注信息, 会在启动书源时显示, 可以留空
 
     // homeUrl: "https://www.bifengzw.com/read/{bookid}", // 书源网站的目录页地址, 用于跳转至目录页
 
@@ -91,6 +93,9 @@
         '''
             let content = document.querySelector('.content').textContent; // 获取小说内容 
             let title = document.querySelector('#content h1').textContent; // 获取小说标题 
+
+            // 如果本页是最后一页, 有些网站的下一页是null, 有些网站的下一页是回到目录页的链接
+            // 这两种情况都是可以接受的, 不过如果下一页的url 为空, 记得直接读取.href 是会报错的, 要加个判断
             let nextPageUrl = document.querySelector('#content > div.page.hidden-xs.hidden-sm > a:nth-child(3)').href; // 获取下一页的链接 
             return {content, title, nextPageUrl} 
         ''', // 函数体, 这里存放 爬虫代码, 需要使用 document (就是浏览器中的document对象) 以及css 选择器来获取数据

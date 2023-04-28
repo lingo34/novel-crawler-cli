@@ -4,7 +4,7 @@ const puppeteer = require('puppeteer');
 const prompt = require('prompt-sync')()
 var Hjson = require('hjson');
 
-const version = "1.0.0"
+const version = "1.0.1"
 
 main()
 
@@ -12,8 +12,8 @@ main()
 // getBook("https://www.xbiquge.tw/book/54510/38637143.html", '风起龙城')
 
 async function main() {
-    console.log("Novel-Crawler 爬虫 v" + version)
-    console.log("GitHub: https://github.com/lingo34/novel-crawler-cli")
+    console.log("\nNovel-Crawler 爬虫 v" + version)
+    console.log("GitHub: https://github.com/lingo34/novel-crawler-cli\n")
     let url = prompt('請輸入开始章节網址: ')
     if (url == '') {
         console.log("url為空，退出程序...")
@@ -73,7 +73,6 @@ async function getBook(url, startIndex, endIndex, dir, bookSourceName) {
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-blink-features=AutomationControlled',
-                'timeout=60000'
             ],
             dumpio: false,
         }
@@ -98,14 +97,11 @@ async function getBook(url, startIndex, endIndex, dir, bookSourceName) {
         bookSourcePath = './bookSource/' + bookSourceName;
     }
 
-    console.log("书源文件: " + bookSourcePath)
-    bookSource = null; // 书源 json, {bookSourceName, bookSourceUrl, getBookInfo, getBookContent}
-    console.log("获取书源...")
-
+    console.log(">> 获取书源...")
+    console.log(">> 书源文件: " + bookSourcePath)
+    // 书源 json, {bookSourceName, bookSourceUrl, getBookInfo, getBookContent}
     bookSource = Hjson.parse(fs.readFileSync(bookSourcePath, 'utf8'))
-
-    // console.log("\n书源已确定: " + JSON.stringify(bookSource, null, 4) + "\n\n")
-    console.log(`\n书源已确定: "${bookSource.bookSourceName}", "${bookSource.bookSourceUrl}"\n\n`)
+    console.log(`>> 书源已确定: "${bookSource.bookSourceName}", "${bookSource.bookSourceUrl}"`)
 
     // 将 json 中的两个 函数字符串转换为可执行函数
     // 但这两个函数字符串转换必须要放在 下面的 page.evaluate 回调函数中，否则会报错
@@ -120,14 +116,14 @@ async function getBook(url, startIndex, endIndex, dir, bookSourceName) {
     // 格式化小说正文内容的函数
     bookSource.formatContentText = new Function(bookSource.formatContentText.arguments, bookSource.formatContentText.body);
     
-    // 书源测试函数
-    bookSource.test = new Function(bookSource.test.arguments, bookSource.test.body);
+    console.log(">> 书源初始化完成\n")
+    // 如果有书源注释信息，打印注释信息
+    if(bookSource.note) console.log("书源信息: \n" + bookSource.note + "\n")
 
-
-    console.log("浏览器已啟動, 获取书籍信息...")
 
 
     // 2. 獲取書籍資訊, js object, {bookname, img, author, intro, homeUrl}
+    console.log("啟動浏览器, 获取书籍信息...")
     let bookInfo = await getBookInfo(browser, bookSource, url)
     let bookname = bookInfo.bookname
 
@@ -245,12 +241,27 @@ async function getBook(url, startIndex, endIndex, dir, bookSourceName) {
             break;
         }
 
+        // 检查 contentPageData 是否存在
+        if(!contentPageData){
+            console.error(` #####! <-- ${dir} 第${pageNum}章 爬取失敗 !!!!! contentPageData 为空 退出程序...######`)
+            console.log(` url為: ${url} index 為: ${pageNum}`)
+            console.log(`上一个页面的数据为: ${JSON.stringify(lastPageData, null, 4)}`)
+            break;
+        }
+        // 检查 contentPageData 各个属性是否存在
+        if(!contentPageData.content || !contentPageData.title){
+            console.error(` #####! <-- ${dir} 第${pageNum}章 爬取失敗 !!!!! contentPageData 小说正文/标题/下一页url爬取失败  退出程序...######`)
+            console.log(` url為: ${url} index 為: ${pageNum}`)
+            console.log(`contentPageData 为 ${JSON.stringify(contentPageData, null, 4)}`)
+            console.log(`上一个页面的数据为: ${JSON.stringify(lastPageData, null, 4)}`)
+        }
+
+
         // 如果本页标题与上一页标题相同, 应当是同章分页, 合并内容
         if(lastPageData && contentPageData.title == lastPageData.title){
             console.log(` <-- ! ${dir} 第${pageNum}章: ${contentPageData.title} - 與上一章 ${pageNum-1} 標題相同, 写入同一个文件`)
             contentPageData.content = lastPageData.content + '\n' + contentPageData.content // 合并内容
             pageNum--; // 页数减一
-            
         }
 
         // 寫入檔案
@@ -261,13 +272,13 @@ async function getBook(url, startIndex, endIndex, dir, bookSourceName) {
             ` #####! <-- ${dir}/ 第${pageNum}章: 寫入錯誤或data為空 !!!!!  退出程序...######`)
 
         // 前往下一页
-        url = contentPageData.nextPageUrl;
-        lastPageData = contentPageData;
-
-        if (url == null || url == bookInfo.homeUrl) {
-            console.log(` #####! <-- 爬取完畢, 本页是目录页: url == "${url}."  退出程序...######`)
+        
+        if (!contentPageData.nextPageUrl || contentPageData.nextPageUrl == bookInfo.homeUrl) {
+            console.log(` #####! <-- 爬取完畢. 下一页url不存在或下一页是返回目录页\n 下一页url = "${contentPageData.nextPageUrl}"  退出程序...######`)
             break;
         }
+        url = contentPageData.nextPageUrl;
+        lastPageData = contentPageData;
 
         //await sleep(200);
     }
@@ -310,10 +321,6 @@ async function getBookInfo(browser, bookSource, chapterUrl) {
     console.log(" --- 正在获取小说信息 --- ")
     // 获取小说主页url
     let homeUrl = bookSource.getHomeUrl(bookSource.getBookID(chapterUrl));
-    console.log(" Home Url: " + homeUrl)
-
-    // Logx
-    //console.log(await getFullHtml(browser, homeUrl));
 
     // 控制浏览器打开新标签页面
     const page = await browser.newPage()

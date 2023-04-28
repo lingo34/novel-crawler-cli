@@ -1,0 +1,154 @@
+{
+    version: "0.0.1", // 书源版本
+
+
+    bookSourceName: "维基文库", // 书源名称
+    bookSourceUrl: "https://zh.wikisource.org/", // 书源网站地址
+
+    // 书源备注信息, 会在启动书源时显示, 可以留空
+    note: 
+    '''
+        警告⚠️: 维基文库有时(或者说, 时常)会包含表格或图片, 
+        这种信息无法被本爬虫正确的爬取, 遇到时可能会出现不可预期的后果
+        另外, 维基文库似乎没有小说封面"
+    '''
+
+    // homeUrl: "https://zh.wikisource.org/wiki/{bookid}", // 书源网站的目录页地址, 用于跳转至目录页
+
+
+    // https://zh.wikisource.org/wiki/
+    // https://zh.wikisource.org/wiki/儒林外史
+
+    // 尚不支持搜索
+    //searchUrl: "", // 书源网站的搜索页地址, 用于跳转至搜索页
+    //bookUrl: "https://www.bifengzw.com/read/{bookId}/",
+
+    // ======== 工具函数 ========
+
+    // 从章节内url 中提取 bookid 的正则表达式
+    // 如果这个函数出错, 会导致无法正确的获得book id, 导致无法跳转至目录页, 并在获取小说信息时报错
+    getBookID:
+    {
+        arguments:"url", // 传入的参数, 第一章或某一章的url, 请不要动这玩意儿
+        body:
+        '''
+            // 此处是函数体, 本函数应该透过解析传入的参数: url, 即章节内的url, 
+            // 来提取 book id 并回传
+            return /\/wiki\/(.+?)\//.exec(url)[1];
+        '''
+
+    },
+    
+    // 从book id 获取 homeUrl 的函数
+    getHomeUrl:
+    {
+        arguments: "bookid",
+        body:
+        '''
+            let homeUrl = "https://zh.wikisource.org/wiki/" + bookid; //注意这里有些网站有.html后缀, 有些没有
+            return homeUrl;
+        '''
+    },
+
+    // ?将获取到的小说正文(content)内容进行处理的函数,
+    formatContentText:
+    {
+        arguments: "content",
+        body:
+        '''
+            // 本函数用于处理获取到的小说正文内容, 例如去除广告, 去除多余的空行等等
+            // 本函数应该透过解析传入的参数: content, 即小说正文内容, 
+            // 来处理并回传处理后的小说正文内容
+
+            // 删除首尾空白
+            content = content.trim();
+            // 將 &nbsp; 轉換為空格
+            content = content.replace(/&nbsp;/g, "");
+
+            return content;
+        '''
+    }
+
+    // ======== Evaluate 函数 - 用于分析网页 ========
+    // 下面的函数用于分析网页, 请不要动这些函数的 arguments 和 body, 你只需要修改 body 中的代码即可
+    // body 中的代码将会在目标页面的浏览器中执行, 因此可以用 document与 css 选择器等浏览器中的工具来获取数据
+
+    // 获取书籍信息
+    getBookInfo:
+    {
+        arguments:"document", // 传入的参数, 是从evaluate那边获取的页面的document 对象, 请不要动这玩意儿
+        body:
+        '''
+            // 此处是函数体, 这里存放爬虫代码, 需要使用 document (就是浏览器中的document对象) 以及css 选择器来获取数据
+            // 获取并透过 return 返回以下数据: {bookname, img, author, intro}
+
+            let bookname = document.querySelector(
+                    '#headerContainer > table:nth-child(1) > tbody > tr > td:nth-child(3) > b'
+                ).textContent; // 获取小说名字
+
+            let img = "n/a"; // 获取小说封面
+            let author = 
+                document.querySelector(
+                    '#headerContainer > table:nth-child(1) > tbody > tr > td:nth-child(3) > a'
+                ).textContent; // 获取小说作者
+
+            let intro = 
+                document.querySelector(
+                    '#headerContainer > table:nth-child(2) > tbody > tr > td'
+                ).textContent; // 获取小说简介
+            
+            return {bookname, img, author, intro}
+            
+        '''
+
+    },
+
+    // 获取章节内容
+    getContent:
+    {
+        arguments:"document", // 传入的参数, 是从evaluate那边获取的页面的document 对象, 请不要动这玩意儿
+        body:
+        '''
+            // 维基文库的小说内容不太好爬, 小说块的父元素里面有很多其他的元素
+            let content = document.querySelector('.mw-parser-output').textContent; // 获取小说内容 
+            // 删除包含在小说内容中的不必要内容
+            content = content.replace(
+                // 将小说内容中的 "目录" 以及 "下一页" 之间的内容删除 页首
+                document.querySelector('#mw-content-text > div.mw-parser-output > table:nth-child(1)').textContent
+                , "")
+                //.replace(
+                // 将小说内容中的 "目录" 以及 "下一页" 之间的内容删除 页尾
+                // 这个页尾因为是靠元素在dom中的位置来定位的(没别的selector了, 也可能是我菜),
+                // 因为这玩意儿与小说正文同层级, 而小说正文元素数量会变, 所以无法爬取, 也就难以删除
+                //document.querySelector('#mw-content-text > div.mw-parser-output > table:nth-child(31)').textContent
+                //, "");
+
+            let title = 
+                document.querySelector(
+                    '#mw-content-text > div.mw-parser-output > table:nth-child(1) > tbody > tr:nth-child(2) > td:nth-child(2)'
+                ).textContent.replace("\n", ""); // 获取小说标题 
+            
+            // 如果本页是最后一页, 有些网站的下一页是null, 有些网站的下一页是回到目录页的链接
+            // 这两种情况都是可以接受的, 不过如果下一页的url 为空, 记得直接读取.href 是会报错的, 要加个判断
+            let nextPageUrl = 
+                document.querySelector(
+                    '#mw-content-text > div.mw-parser-output > table:nth-child(1) > tbody > tr:nth-child(2) > td:nth-child(3) > a'
+                );
+            if(nextPageUrl)
+                nextPageUrl = nextPageUrl.href; // 获取下一页的链接 
+            else
+                nextPageUrl = null;
+
+            return {content, title, nextPageUrl} 
+        ''', // 函数体, 这里存放 爬虫代码, 需要使用 document (就是浏览器中的document对象) 以及css 选择器来获取数据
+            // 获取并透过 return 返回以下数据: (content, title, nextPageUrl)
+    }
+
+    // 测试函数, 用于测试
+    "test":
+    {
+        "arguments":"document",
+        "body":"console.log('hey jojo! ' + document); return 'Hello, ' + document;"
+    }
+
+}
