@@ -54,9 +54,10 @@ node index.js
 目前支持的网站
 | url | name | 书源档案 |
 | --- | ---- | ------ |
-| https://www.xbiquge.tw/   | 笔趣阁    | xbiquge-tw.hjson      |
-| https://www.shukw.com/    | 书库网    | shukw-com.hjson       |
-| https://www.bifengzw.com  | 东流小说  | bifengzw-com.hjson    |
+| https://www.xbiquge.tw/   | 笔趣阁    | xbiquge-tw.hjson       |
+| https://www.shukw.com/    | 书库网    | shukw-com.hjson        |
+| https://www.bifengzw.com  | 东流小说  | bifengzw-com.hjson      |
+| https://zh.wikisource.org | 维基文库  | zh-wikisource-org.hjson |
 
 打算支持的网站
 - ...更多笔趣阁
@@ -74,15 +75,17 @@ node index.js
 
 - [x] ~~拆分并模块化html解析模块~~
 - [x] ~~弄一种匹配机制，如果是已适配的网站，直接用对应库~~
-- [ ] 适配更多网站，或尝试适配书源语法
 - [ ] 解决必须提供第一章url的问题, 或者说, 支持提供目录url
 - [ ] 写一个用来给书源debug 的程序, 只包含必要代码以及debug 工具
+- [ ] docker 支持
+
+长期目标
+- [ ] 适配更多网站，或尝试适配书源语法
 
 为webui 做准备
 
 - [ ] 优化代码, 函数式编程化, 提供更多可用函数
 - [ ] 迁移web
-- [ ] docker?
 
 
 
