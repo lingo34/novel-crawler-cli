@@ -53,12 +53,12 @@ node index.js
 ## Supported Websites 目前支持的网站
 
 目前支持的网站
-| url | name | 书源档案 |
-| --- | ---- | ------ |
-| https://www.xbiquge.tw/   | 笔趣阁    | xbiquge-tw.hjson       |
-| https://www.shukw.com/    | 书库网    | shukw-com.hjson        |
-| https://www.bifengzw.com  | 东流小说  | bifengzw-com.hjson      |
-| https://zh.wikisource.org | 维基文库  | zh-wikisource-org.hjson |
+| url | name | 书源档案 | 备注 |
+| --- | ---- | ------ | ---- |
+| https://www.xbiquge.tw/   | 笔趣阁    | xbiquge-tw.hjson       | |
+| https://www.shukw.com/    | 书库网    | shukw-com.hjson        | |
+| https://www.bifengzw.com  | 东流小说  | bifengzw-com.hjson      | |
+| https://zh.wikisource.org | 维基文库  | zh-wikisource-org.hjson | 维基文库的格式十分复杂, 有时会有表格和图片这种本爬虫无法处理内容|
 
 打算支持的网站
 - ...更多笔趣阁
