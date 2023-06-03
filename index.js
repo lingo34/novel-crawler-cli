@@ -31,8 +31,8 @@ async function main() {
     if (dir == '') {
         dir = './'
     }
-    let mergeable = prompt('请选择是否合并所以章节至单独文件?Y/N(N)')
-    if(mergeable ==='y' || mergeable==='Y'){
+    let mergeable = prompt('请选择是否合并所有章节至单独文件?Y/N(N)')
+    if(mergeable === 'y' || mergeable === 'Y'){
         mergeable = true
     }
     else {
