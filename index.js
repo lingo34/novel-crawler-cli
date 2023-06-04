@@ -31,6 +31,13 @@ async function main() {
     if (dir == '') {
         dir = './'
     }
+    let mergeable = prompt('请选择是否合并所有章节至单独文件?Y/N(N)')
+    if(mergeable === 'y' || mergeable === 'Y'){
+        mergeable = true
+    }
+    else {
+      mergeable = false
+    }
     // console.log(`小说将儲存到: ${dir}小说名/`)
 
     // 书源文件
@@ -51,15 +58,16 @@ async function main() {
     // bookSourceName = './bookSource/' + bookSourceName
     console.log(`书源文件: ${'./bookSource/' + bookSourceName}`)
 
-    await getBook(url, startIndex, endIndex, dir, bookSourceName)
+    await getBook(url, startIndex, endIndex, dir, bookSourceName, mergeable)
 }
 
 
 
 // this function crawl the content of a novel
-// url: 網址, startIndex: 起始章節, endIndex: 結束章節, 
+// url: 網址, startIndex: 起始章節, endIndex: 結束章節,
 // dir: 存放資料夾, 地址带/结尾, bookSourceDir: 书源文件路径, 为空则根据url自动匹配
-async function getBook(url, startIndex, endIndex, dir, bookSourceName) {
+// mergeable: 是否合并为单一文件,默认为false
+async function getBook(url, startIndex, endIndex, dir, bookSourceName, mergeable) {
 
     console.log("获取书籍信息, 启动浏览器...")
 
@@ -115,7 +123,7 @@ async function getBook(url, startIndex, endIndex, dir, bookSourceName) {
     bookSource.getHomeUrl = new Function(bookSource.getHomeUrl.arguments, bookSource.getHomeUrl.body);
     // 格式化小说正文内容的函数
     bookSource.formatContentText = new Function(bookSource.formatContentText.arguments, bookSource.formatContentText.body);
-    
+
     console.log(">> 书源初始化完成\n")
     // 如果有书源注释信息，打印注释信息
     if(bookSource.note) console.log("书源信息: \n" + bookSource.note + "\n")
@@ -129,7 +137,7 @@ async function getBook(url, startIndex, endIndex, dir, bookSourceName) {
 
     bookInfo.bookSourceVersion = bookSource.version // 往书籍信息中添加书源版本号
     bookInfo.crawlerVersion = `lingo34/novel-crawler-cli:v${version}` // 往书籍信息中添加本软件版本号
-    
+
     console.log("书籍信息:\n" + JSON.stringify(bookInfo, null, 4))
 
 
@@ -180,7 +188,7 @@ async function getBook(url, startIndex, endIndex, dir, bookSourceName) {
     // 如果从小说第一页开始爬取，添加 000 小说介绍文件, <= 1 是因为可以填负数
     if (startIndex <= 1) {
         console.log("创建 000 介绍文件...")
-        
+
         // 寫入 000 介绍檔案
         writeFile(`${dir}`, `000.txt`, JSON.stringify(bookInfo, null, 4),
             ` --> ${bookInfo.bookname} / 000 介绍文件 已儲存`, ` #####! <-- 000 介绍文件寫入錯誤 !!!!!  退出程序...######`)
@@ -266,13 +274,22 @@ async function getBook(url, startIndex, endIndex, dir, bookSourceName) {
 
         // 寫入檔案
         //          (目录位置/, 檔案名稱, 檔案內容, 成功訊息, 失敗訊息)
+      if(!mergeable){
         writeFile(`${dir}`, `${pageNum.toString().padStart(2, '0')} ${contentPageData.title}.txt`,
             contentPageData.content,
             ` --> ${dir} 第${pageNum}章: ${contentPageData.title} 已儲存`,
             ` #####! <-- ${dir}/ 第${pageNum}章: 寫入錯誤或data為空 !!!!!  退出程序...######`)
+      }
+      // 合并模式
+      else {
+        writeFile(`${dir}`, `${bookInfo.bookname}.txt`,
+            `${contentPageData.title}\n  ${contentPageData.content.replaceAll('    ','\n')}\n\n`,
+            ` --> ${dir} 第${pageNum}章: ${contentPageData.title} 已儲存`,
+            ` #####! <-- ${dir}/ 第${pageNum}章: 寫入錯誤或data為空 !!!!!  退出程序...######`,1,'a+')
+      }
 
         // 前往下一页
-        
+
         if (!contentPageData.nextPageUrl || contentPageData.nextPageUrl == bookInfo.homeUrl) {
             console.log(` #####! <-- 爬取完畢. 下一页url不存在或下一页是返回目录页\n 下一页url = "${contentPageData.nextPageUrl}"  退出程序...######`)
             break;
@@ -392,7 +409,7 @@ async function getFullHtml(browser, url)
     //     // }
     //   });
 
-    
+
 
     try {
         // 使用evaluate方法在浏览器中执行传入函数
@@ -444,13 +461,13 @@ function findBookSourceByHost(dir, host) {
 }
 
 // 封装fs.writeFile, 如果写入错误, 递归重试10次
-// dir: 檔案目录, fileName: 檔案名稱, data: 檔案內容, 
-// successMessage: 成功訊息, errMessage: 失敗訊息, 
-// attempts: 重試次數, 调用时不用传参
-function writeFile(dir, fileName, data, successMessage, errMessage, attempts = 1) {
-    
+// dir: 檔案目录, fileName: 檔案名稱, data: 檔案內容,
+// successMessage: 成功訊息, errMessage: 失敗訊息,
+// attempts: 重試次數, 调用时不用传参, flag: 文件写入方式,默认w覆盖模式,合并TXT时使用追加模式
+function writeFile(dir, fileName, data, successMessage, errMessage, attempts = 1, flag='w') {
+
     // 如果失败, 重試10次
-    fs.writeFile(`${dir}${sanitizeFileName(fileName)}`, data, function (err) {
+    fs.writeFile(`${dir}${sanitizeFileName(fileName)}`, data, {flag}, function (err) {
         if (err) {
             console.log(errMessage)
             console.log(err);
@@ -468,10 +485,10 @@ function writeFile(dir, fileName, data, successMessage, errMessage, attempts = 1
         return true;
     });
 
-        
-        
+
+
         // try {
-            
+
 
         // } catch (err) {
         //     if (i >= 10) {
