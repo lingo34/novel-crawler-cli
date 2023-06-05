@@ -77,6 +77,7 @@
         arguments:"document", // 传入的参数, 是从evaluate那边获取的页面的document 对象, 请不要动这玩意儿
         body:
         //! 修改下面的代码, 以适配你的网站
+        // 小提示: 不要在这里使用 console.log, 这会让程序变得很不稳定, 还有, 你看不见他的输出
         '''
             // 此处是函数体, 这里存放爬虫代码, 需要使用 document (就是浏览器中的document对象) 以及css 选择器来获取数据
             // 获取并透过 return 返回以下数据: {bookname, img, author, intro} 
@@ -96,14 +97,30 @@
         arguments:"document", // 传入的参数, 是从evaluate那边获取的页面的document 对象, 请不要动这玩意儿
         body: 
         //! 修改下面的代码, 以适配你的网站
+        // 小提示: 不要在这里使用 console.log, 这会让程序变得很不稳定, 还有, 你看不见他的输出
         '''
-            let content = document.querySelector('.content').textContent; // 获取小说内容 
-            let title = document.querySelector('.content-text').textContent; // 获取小说标题 
+        let content = null;
+        let title = null;
+        let nextPageUrl = null;
+
+         
+        try{
+            content = Array.from(document.querySelectorAll('.content .content-text')).map(element => element.innerText.trim()).join('\n'); // 获取小说内容 
+        }
+        catch(e){content = null}
+
+        try{
+            title = document.querySelector('.content-text').innerText.replace(/\n.*/, ''); // 获取小说标题 
+        }
+        catch(e){title = null}
 
             // 如果本页是最后一页, 有些网站的下一页是null, 有些网站的下一页是回到目录页的链接
             // 这两种情况都是可以接受的, 不过如果下一页的url 为空, 记得直接读取.href 是会报错的, 要加个判断
-            let nextPageUrl = document.querySelector('.nav-btn-group a:nth-child(3)').href; // 获取下一页的链接 
-            console.log("----------->> nextPageUrl: " + nextPageUrl);
+        try{
+            nextPageUrl = document.querySelector('.nav-btn-group a:nth-child(3)').href; // 获取下一页的链接 
+        }
+        catch(e){nextPageUrl = null}
+
             return {content, title, nextPageUrl} 
         ''', // 函数体, 这里存放 爬虫代码, 需要使用 document (就是浏览器中的document对象) 以及css 选择器来获取数据
             // 获取并透过 return 返回以下数据: (content, title, nextPageUrl)

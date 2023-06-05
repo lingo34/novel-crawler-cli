@@ -6,6 +6,10 @@ var Hjson = require('hjson');
 
 const version = "1.0.1"
 
+const maxReloadCount = 2; // 最大重试次数
+const maxRetryCount = 10; // 最大重试次数
+const debug = false; // 是否开启debug模式, debug模式下会打印更多信息
+
 main()
 
 // 測試數據
@@ -47,7 +51,7 @@ async function main() {
     // bookSourceName = './bookSource/' + bookSourceName
     console.log(`书源文件: ${'./bookSource/' + bookSourceName}`)
 
-    await getBook(url, startIndex, endIndex, dir, bookSourceName, mergeable)
+    return await getBook(url, startIndex, endIndex, dir, bookSourceName, mergeable)
 }
 
 
@@ -63,14 +67,16 @@ async function getBook(url, startIndex, endIndex, dir, bookSourceName, mergeable
     // 启动浏览器
     const browser = await puppeteer.launch(
         {
+            // executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
             headless: "new", // true是无头模式, false是有gui, new 是新版无头
             args: [
-                //"--user-data-dir=./chromeTemp", // 保存登录状态
-                // '--no-sandbox',
-                 '--disable-setuid-sandbox',
-                 '--disable-blink-features=AutomationControlled',
+                //  "--user-data-dir=./chromeTemp", // 保存登录状态
+                //  '--no-sandbox',
+                //  '--disable-setuid-sandbox',
+                //  '--disable-blink-features=AutomationControlled',
             ],
-            dumpio: true,
+            // 将浏览器的输出信息打印到终端, debug 时推荐开启
+            dumpio: debug,
         }
     )
 
@@ -204,16 +210,16 @@ async function getBook(url, startIndex, endIndex, dir, bookSourceName, mergeable
         let contentPageData = null; // store the data of the page, js object, {content, title, nextPageUrl}
         // 在新标签中打开要爬取的网页
 
-        // 如果出错，要重試10次
-        for (errCount = 0; errCount < 10; errCount++) {
-            if (errCount > 9) {
-                console.error(` #####! <-- ${dir} 第${pageNum}章 爬取失敗 !!!!!  退出程序...######`)
-                console.log("可能是抵达最后一页, 但并未检测成功, 或是书源中的 getContent 函数报错, 请检查书源文件是否正确")
-                console.log(` url為: ${url} index 為: ${pageNum}`)
-                return;
-            }
+        // 如果出错，要reload 页面2次(预设), 每次reload重試10次(预设)
 
+        for (let errCount = 0, reloadCount = 0; 
+            errCount < maxRetryCount && reloadCount < maxReloadCount; 
+            errCount++) {
             try {
+                // 如果曾爬去失败过, 这次爬取前先等待一会儿, 等加载完毕
+                // 把加载时间写死是因为不知道怎么获取加载完毕的事件, 也不知道怎么判断加载完毕, document.readyState 用处好像不大...
+                await sleep(800 * errCount)
+                //await page.waitForSelector('.content .content-text')
                 // 使用evaluate方法在浏览器中执行传入函数（完全的浏览器环境，所以函数内可以直接使用window、document等所有对象和方法）
                 // =================== 此处已被替换为hjson, 为content evaluate 函数 ===================
                 contentPageData = await page.evaluate((bookSource) => {
@@ -222,18 +228,50 @@ async function getBook(url, startIndex, endIndex, dir, bookSourceName, mergeable
                 }, bookSource)
                 // 格式化小说正文内容
                 contentPageData.content = bookSource.formatContentText(contentPageData.content)
+                if(!contentPageData.title || contentPageData.title == "")
+                    throw "title为空"
             } catch (err) {
                 if (page.url() == bookInfo.homeUrl) {
                     console.log(" #####! <-- 爬取完畢, 本页是目录页: home url.  退出程序...######")
                     return;
                 }
-                console.error(` #####! <-- ${dir} 第${pageNum}章 爬取失敗，正在重試... ${errCount + 1}/10`)
-                await page.reload();
+                // 如果这是最后一次重试
+                if (errCount >= maxRetryCount - 1) {
+                    console.error(` #####! <-- ${dir} 第${pageNum}章 爬取失敗 !!!!!  退出程序...######`)
+
+                    console.log("\n #####! <-- 爬取错误, contentPageData:")
+                    console.log(contentPageData)
+                    console.log(" #####! vvv-- 报错信息:")
+                    console.log(err)
+
+                    if(reloadCount < maxReloadCount - 1)
+                    {
+                        console.log(` #####! <-- 重新加载页面 ${reloadCount + 2}/${maxReloadCount} 次...`)
+                        reloadCount++;
+                        errCount = -1; // 重置 errCount
+                        continue;
+                    }
+
+                    console.log("可能是抵达最后一页, 但并未检测成功, 或是书源中的 getContent 函数报错, 请检查书源文件是否正确")
+                    console.log(` url為: ${url} index 為: ${pageNum}`)
+                    await browser.close()
+                    return;
+                }
+
+                if(debug)
+                {
+                    console.log("\n #####! <-- 爬取错误, contentPageData:")
+                    console.log(contentPageData)
+                    console.log(" #####! vvv-- 报错信息:")
+                    console.log(err)
+                }
+                console.error(` #####! <-- ${dir} 第${pageNum}章 爬取失敗，正在重試... ${errCount + 1}/10\n`)
                 continue;
             }
 
             break;
         }
+        
 
         // 检查 contentPageData 是否存在
         if(!contentPageData){

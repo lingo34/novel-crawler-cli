@@ -1,9 +1,10 @@
 
 .DS_Store
-node_modules/*
-xsbk/*
-lab/*
-chromeTemp/*
+node_modules
+xsbk
+lab
+chromeTemp
+.cache
 
 # debug files
 lab.js
