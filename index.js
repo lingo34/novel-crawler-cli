@@ -31,7 +31,7 @@ async function main() {
     if (dir == '') {
         dir = './'
     }
-    let mergeable = prompt('请选择是否合并所有章节至单独文件?Y/N(N)')
+    let mergeable = prompt('请选择是否合并所有章节至单独文件?y/N(N)')
     if(mergeable === 'y' || mergeable === 'Y'){
         mergeable = true
     }
@@ -42,17 +42,6 @@ async function main() {
 
     // 书源文件
     let bookSourceName;
-    // 列出所有书源文件
-    // console.log("\n>> 列出所有书源文件 << \n")
-    // fs.readdirSync('./bookSource', (err, files) => {
-    //     if (err) {
-    //         console.error(err);
-    //         return;
-    //     }
-    //     files.forEach(file => {
-    //         console.log(file);
-    //     });
-    // });
 
     bookSourceName = prompt('請指定书源文件, 不指定则根据url自动匹配: ')
     // bookSourceName = './bookSource/' + bookSourceName
@@ -77,7 +66,7 @@ async function getBook(url, startIndex, endIndex, dir, bookSourceName, mergeable
             headless: "new", // 默认是无头模式，new 是新版无头
             //args: ["--user-data-dir=./chromeTemp"]
             args: [
-                // "--user-data-dir=./chromeTemp" // 保存登录状态
+                "--user-data-dir=./chromeTemp", // 保存登录状态
                 // '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-blink-features=AutomationControlled',
@@ -167,9 +156,6 @@ async function getBook(url, startIndex, endIndex, dir, bookSourceName, mergeable
     }
 
     // 創建資料夾
-    // fs.mkdirSync(`${dir}`, function (err) {
-    // })
-
     try {
         fs.mkdirSync(`${dir}`, { recursive: true }) // 创建小说名稱資料夾
         console.log(`创建目录"${dir}"成功。`)
@@ -296,12 +282,7 @@ async function getBook(url, startIndex, endIndex, dir, bookSourceName, mergeable
         }
         url = contentPageData.nextPageUrl;
         lastPageData = contentPageData;
-
-        //await sleep(200);
     }
-
-
-
 
     // 关闭浏览器
     await browser.close()
@@ -395,22 +376,6 @@ async function getFullHtml(browser, url)
 
     let data = null;
 
-    // await page.screenshot({
-    //     path: 'jojojojo.png',
-    //     type: 'png',
-    //     // quality: 100, 只对jpg有效
-    //     fullPage: true,
-    //     // 指定区域截图，clip和fullPage两者只能设置一个
-    //     // clip: {
-    //     //   x: 0,
-    //     //   y: 0,
-    //     //   width: 1000,
-    //     //   height: 40
-    //     // }
-    //   });
-
-
-
     try {
         // 使用evaluate方法在浏览器中执行传入函数
         //  ==================== 已被替换为 hjson get book info. 为 evaluate 函数 ====================
@@ -484,22 +449,6 @@ function writeFile(dir, fileName, data, successMessage, errMessage, attempts = 1
         console.log(successMessage);
         return true;
     });
-
-
-
-        // try {
-
-
-        // } catch (err) {
-        //     if (i >= 10) {
-        //         console.log(` #####! --- 寫入錯誤, 第10重试失敗, 退出程序... ######`)
-        //         console.error(err);
-        //         return
-        //     }
-        //     console.log(` #####! --- 寫入錯誤, 正在重试: ${i}/10 ######`)
-        //     sleep(500); // 等待0.5秒后重试
-        //     continue;
-        // }
 }
 
 
