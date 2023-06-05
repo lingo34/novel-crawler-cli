@@ -50,6 +50,11 @@ node index.js
 如果你打算从某一章开始爬取，比如第30章(可能是因为之前爬一半中断了)， 直接写第30章的地址。
 另外看到小说档案名前的数字了吗？重新开始时记得把那个数字设置为开始数字。这个数字与章节不一定相同。
 
+## 解除安装
+几乎所有跟本程序相关的档案都只会出现在本程序的文件夹内，
+不过`puppeteer`会把`Chrome For Testing` 放在 `$HOME/.cache/puppeteer` (mac/linux/unix)
+参考[官方文档](https://pptr.dev/#installation)
+
 ## Supported Websites 目前支持的网站
 
 目前支持的网站
