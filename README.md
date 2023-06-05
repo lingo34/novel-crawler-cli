@@ -132,6 +132,10 @@ GitHub Copilot
 小说文件名
 
 
-
+## Docker
+~~~ sh
+docker build -t novel-crawler-cli .
+docker run novel-crawler-cli -lt
+~~~
 
 
