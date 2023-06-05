@@ -1,6 +1,8 @@
 > :warning: If you don't understand Chinese, this repo is useless for you.
 > This program aims to crawl Chinese novel websites, so almost everything (like comments) is written in Chinese
 
+> ⚠️ 本软件仅供学习使用，请在下载后24小时内删除
+
 ## 这是啥
 这是年轻人的第一个爬虫项目, 是一个基于Node.JS 与puppeteer的纯命令行软件，以爬取免费小说网站上的免费小说资源。
 
@@ -19,9 +21,9 @@
 
 ## 一点点声明
 
-这个项目只是一个爬虫项目，爬取某些**免费小说**网站上的**免费**资源，此工具本身并*不*提供破解或是小说解锁功能。
+这个项目只是一个爬虫项目，本身并*不*提供破解或是小说解锁功能。
 
-所有本工具能爬取的数据皆为网络上的公开资料，如有版权纠纷，请联系数据来源。
+所有本工具能爬取的数据大多为网络上的公开资料，如有版权纠纷，请联系数据来源。
 
 ## 怎么用这玩意儿
 首先你需要
@@ -38,6 +40,7 @@ https://github.com/lingo34/novel-crawler-cli
 # 然后 npm install 一下
 npm install
 ~~~
+大约280mb 的chromium 浏览器会在此时被下载到程序目录下的 .cache文件夹，如果你希望使用自己的chrome，可以删除程序目录下的`.puppeteerrc.cjs`文件(参考[官方文档](https://pptr.dev/guides/configuration#changing-the-default-cache-directory))，并修改`const browser = await puppeteer.launch()`中的参数(参考[官方文档](https://pptr.dev/#default-runtime-settings)) (未来某个时候将会模块化成config.hjson文件，不过未来的事嘛，明天再说)
 
 然后再用node 执行 index.js
 ~~~sh
@@ -51,11 +54,12 @@ node index.js
 另外看到小说档案名前的数字了吗？重新开始时记得把那个数字设置为开始数字。这个数字与章节不一定相同。
 
 ## 解除安装
-几乎所有跟本程序相关的档案都只会出现在本程序的文件夹内，
-不过`puppeteer`会把`Chrome For Testing` 放在 `$HOME/.cache/puppeteer` (mac/linux/unix)
+几乎所有跟本程序相关的档案都只会出现在本程序的文件夹内，当然，如果你是为了跑这个程序才装的`node.js`, 记得把它给删了。
+不过如果你删除了`.puppeteerrc.cjs` 文件，`puppeteer`会把`Chrome For Testing` 放在 `$HOME/.cache/puppeteer` (mac/linux/unix)
 参考[官方文档](https://pptr.dev/#installation)
 
 ## Supported Websites 目前支持的网站
+如果你有想要添加的网站, 可以开个issue 或是联系我 `lingo34@skiff.com`, 我心情好而且很闲的时候就有机会加一下
 
 目前支持的网站
 | url | name | 书源档案 | 备注 |
@@ -94,6 +98,8 @@ node index.js
 
 - [x] ~~拆分并模块化html解析模块~~
 - [x] ~~弄一种匹配机制，如果是已适配的网站，直接用对应库~~
+- [ ] cookies 登入
+- [ ] 更新书源
 - [ ] 解决必须提供第一章url的问题, 或者说, 支持提供目录url
 - [ ] 写一个用来给书源debug 的程序, 只包含必要代码以及debug 工具
 - [ ] docker 支持
