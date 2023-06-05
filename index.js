@@ -63,15 +63,14 @@ async function getBook(url, startIndex, endIndex, dir, bookSourceName, mergeable
     // 启动浏览器
     const browser = await puppeteer.launch(
         {
-            headless: "new", // 默认是无头模式，new 是新版无头
-            //args: ["--user-data-dir=./chromeTemp"]
+            headless: "new", // true是无头模式, false是有gui, new 是新版无头
             args: [
-                "--user-data-dir=./chromeTemp", // 保存登录状态
+                //"--user-data-dir=./chromeTemp", // 保存登录状态
                 // '--no-sandbox',
-                '--disable-setuid-sandbox',
-                '--disable-blink-features=AutomationControlled',
+                 '--disable-setuid-sandbox',
+                 '--disable-blink-features=AutomationControlled',
             ],
-            dumpio: false,
+            dumpio: true,
         }
     )
 
@@ -209,6 +208,7 @@ async function getBook(url, startIndex, endIndex, dir, bookSourceName, mergeable
         for (errCount = 0; errCount < 10; errCount++) {
             if (errCount > 9) {
                 console.error(` #####! <-- ${dir} 第${pageNum}章 爬取失敗 !!!!!  退出程序...######`)
+                console.log("可能是抵达最后一页, 但并未检测成功, 或是书源中的 getContent 函数报错, 请检查书源文件是否正确")
                 console.log(` url為: ${url} index 為: ${pageNum}`)
                 return;
             }
@@ -343,6 +343,8 @@ async function getBookInfo(browser, bookSource, chapterUrl) {
         }, bookSource)
     } catch (err) {
         console.error(` #####! <-- 000 介绍文件 爬取失敗，正在报错...`)
+        console.error(` #####! <-- 可能是书源中的 getBookInfo 函数报错, 请检查书源文件是否正确`)
+        console.error(` #####! <-- 接下来打印报错信息: \n\n`)
         throw err;
     }
     data.homeUrl = homeUrl;

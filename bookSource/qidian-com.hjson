@@ -79,8 +79,7 @@
         //! 修改下面的代码, 以适配你的网站
         '''
             // 此处是函数体, 这里存放爬虫代码, 需要使用 document (就是浏览器中的document对象) 以及css 选择器来获取数据
-            // 获取并透过 return 返回以下数据: {bookname, img, author, intro}
-            .book-info > h1 > em
+            // 获取并透过 return 返回以下数据: {bookname, img, author, intro} 
             let bookname = document.querySelector('.book-info h1 em').textContent; // 获取小说名字
             let img = document.querySelector('.book-img img').src; // 获取小说封面
             let author = document.querySelector('.book-info h1 .writer').textContent // 获取小说作者
@@ -104,6 +103,7 @@
             // 如果本页是最后一页, 有些网站的下一页是null, 有些网站的下一页是回到目录页的链接
             // 这两种情况都是可以接受的, 不过如果下一页的url 为空, 记得直接读取.href 是会报错的, 要加个判断
             let nextPageUrl = document.querySelector('.nav-btn-group a:nth-child(3)').href; // 获取下一页的链接 
+            console.log("----------->> nextPageUrl: " + nextPageUrl);
             return {content, title, nextPageUrl} 
         ''', // 函数体, 这里存放 爬虫代码, 需要使用 document (就是浏览器中的document对象) 以及css 选择器来获取数据
             // 获取并透过 return 返回以下数据: (content, title, nextPageUrl)
