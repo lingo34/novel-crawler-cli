@@ -68,7 +68,7 @@ node index.js
 | https://www.shukw.com/    | 书库网    | shukw-com.hjson        | |
 | https://www.bifengzw.com  | 东流小说  | bifengzw-com.hjson      | |
 | https://zh.wikisource.org | 维基文库  | zh-wikisource-org.hjson | 维基文库的格式十分复杂, 有时会有表格和图片这种本爬虫无法处理内容|
-| https://www.qidian.com/   | qd中文网  | www-qidian-com.hjson   | |
+| https://www.qidian.com/   | qd中文网  | www-qidian-com.hjson   | 这东西不太稳定, 很玄, 如果失败了就多试几次。支持cookie 登入|
 
 打算支持的网站
 - ...更多笔趣阁
@@ -88,6 +88,14 @@ node index.js
 ## 限制
 由于储存格式为纯文本, 这个爬虫并不能爬取图片或表格等富文本信息, 或许有一天会添加表格或是将html 语法转换成markdown 格式的功能, 不过目前不在计划当中, 如果有人愿意的话请务必开个pr
 
+
+## 关于Cookie
+有些网站或许会要求登入, 而众所周知, cookie 是储存登入状态的好地方。
+所以只要从你的浏览器获取cookie, 再把cookie 导入到本程序里就可以了。
+
+关于如何从浏览器中获取cookie, 可以使用像是[EditThisCookie](https://chrome.google.com/webstore/detail/editthiscookie/fngmhnnpilhplaeedifhccceomclgfbg) (chrome) 或是 [CookieEditor](https://addons.mozilla.org/zh-CN/firefox/addon/cookie-editor/) (FireFox)之类的插件。 看这篇文章 [Puppeteer cookie 使用，免登录 CSDN 简书 掘金](https://guozh.net/puppeteer-cookie-login/)
+
+获取到 json 格式的cookie 之后, 把它贴到本程序目录下的 `cookie.json` 文件中。如果这个文件不存在，就自己创建一个。
 
 
 ## 目前进度

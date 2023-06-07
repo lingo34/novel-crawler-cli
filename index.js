@@ -4,15 +4,42 @@ const puppeteer = require('puppeteer');
 const prompt = require('prompt-sync')()
 var Hjson = require('hjson');
 
-const version = "1.0.2"
+const version = "1.0.3"
 
-const config = Hjson.parse(fs.readFileSync('./config.hjson', 'utf8'));
+const config = (function(filePath) 
+{
+    let configFile = null;
+    if(!fs.existsSync(filePath))
+    {
+        console.log(">> 配置文件不存在, 创建默认配置文件...")
+        configFile = fs.readFileSync('./config.hjson.template', 'utf8')
+        fs.writeFileSync(filePath, configFile, 'utf8');
+    }
+    else 
+        configFile = fs.readFileSync(filePath, 'utf8')
+    
+    return Hjson.parse(configFile);
+})('./config.hjson') ;
+
 const maxReloadCount = config.maxReloadCount; // 最大重试次数
 const maxRetryCount = config.maxRetryCount; // 最大重试次数
 const debug = config.debug; // 是否开启debug模式, debug模式下会打印更多信息
 const browserLaunchOptions = config.browserLaunchOptions; // 启动浏览器的参数 
 
-// !dev const cookies = require('./cookie.json');
+const cookies = (function(cookieFilePath) {
+    // file exists and not empty
+    if((fs.existsSync()
+    && fs.statSync(cookieFilePath).isFile()) ||
+    (fs.readFileSync(cookieFilePath, 'utf8').trim() != '')
+    ){
+        return require(cookieFilePath);
+    } else {
+        console.log(">> cookie.json 不存在, 跳过设置cookie...")
+        return null;
+    }
+})('./cookie.json'); 
+
+
 
 main()
 
@@ -46,13 +73,11 @@ async function main() {
     else {
       mergeable = false
     }
-    // console.log(`小说将儲存到: ${dir}小说名/`)
 
     // 书源文件
     let bookSourceName;
 
     bookSourceName = prompt('請指定书源文件, 不指定则根据url自动匹配: ')
-    // bookSourceName = './bookSource/' + bookSourceName
     console.log(`书源文件: ${'./bookSource/' + bookSourceName}`)
 
     return await getBook(url, startIndex, endIndex, dir, bookSourceName, mergeable)
@@ -72,8 +97,6 @@ async function getBook(url, startIndex, endIndex, dir, bookSourceName, mergeable
     const browser = await puppeteer.launch(
         browserLaunchOptions
     )
-
-
 
     // ------ 传入参数初始化/格式化 ------
 
@@ -119,6 +142,7 @@ async function getBook(url, startIndex, endIndex, dir, bookSourceName, mergeable
 
     // 2. 獲取書籍資訊, js object, {bookname, img, author, intro, homeUrl}
     console.log("啟動浏览器, 获取书籍信息...")
+
     let bookInfo = await getBookInfo(browser, bookSource, url)
     let bookname = bookInfo.bookname
 
@@ -175,12 +199,16 @@ async function getBook(url, startIndex, endIndex, dir, bookSourceName, mergeable
 
         // 寫入 000 介绍檔案
         writeFile(`${dir}`, `000.txt`, JSON.stringify(bookInfo, null, 4),
-            ` --> ${bookInfo.bookname} / 000 介绍文件 已儲存`, ` #####! <-- 000 介绍文件寫入錯誤 !!!!!  退出程序...######`)
+            ` --> ${bookInfo.bookname} / 000 介绍文件 已儲存\n`, ` #####! <-- 000 介绍文件寫入錯誤 !!!!!  退出程序...######\n`)
     }
 
     // 爬取書籍內容
     // 控制浏览器打开新标签页面
     const page = await browser.newPage()
+
+    //设置cookie
+    if(cookies)
+        await setCookie(page, cookies, verbose=debug);
     
     console.log("标签页已啟動, 开始爬取小说内容...")
 
@@ -194,12 +222,7 @@ async function getBook(url, startIndex, endIndex, dir, bookSourceName, mergeable
             console.log(` url為: "${url}" index 為: ${pageNum}\n`)
             break;
         }
-
-        //!dev 设置每个cookie
-        // for (const cookie of cookies) {
-        //     await page.setCookie(cookie);
-        // }
-
+        
         await page.goto(url).catch(err => {
             console.error(` #####! <-- ${dir} 第${pageNum}章 访问失败 !!!!!  退出程序...######`)
             console.log(` url為: ${url} index 為: ${pageNum}\n`)
@@ -301,14 +324,14 @@ async function getBook(url, startIndex, endIndex, dir, bookSourceName, mergeable
       if(!mergeable){
         writeFile(`${dir}`, `${pageNum.toString().padStart(2, '0')} ${contentPageData.title}.txt`,
             contentPageData.content,
-            ` --> ${dir} 第${pageNum}章: ${contentPageData.title} 已儲存`,
+            ` --> ${dir} 第${pageNum}章: ${contentPageData.title} 已儲存\n`,
             ` #####! <-- ${dir}/ 第${pageNum}章: 寫入錯誤或data為空 !!!!!  退出程序...######`)
       }
       // 合并模式
       else {
         writeFile(`${dir}`, `${bookInfo.bookname}.txt`,
             `${contentPageData.title}\n  ${contentPageData.content.replaceAll('    ','\n')}\n\n`,
-            ` --> ${dir} 第${pageNum}章: ${contentPageData.title} 已儲存`,
+            ` --> ${dir} 第${pageNum}章: ${contentPageData.title} 已儲存\n`,
             ` #####! <-- ${dir}/ 第${pageNum}章: 寫入錯誤或data為空 !!!!!  退出程序...######`,1,'a+')
       }
 
@@ -407,30 +430,18 @@ function convertToPlainText(str) {
     return str;
 }
 
-async function getFullHtml(browser, url)
-{
 
-    // 控制浏览器打开新标签页面
-    const page = await browser.newPage()
-    await page.goto(url)
-
-    let data = null;
-
-    try {
-        // 使用evaluate方法在浏览器中执行传入函数
-        //  ==================== 已被替换为 hjson get book info. 为 evaluate 函数 ====================
-        data = await page.evaluate(() => {
-
-            return document.body.innerHTML; // 直接回传页面的html, 用于测试
-        })
-    } catch (err) {
-        console.error(`\n\n #####! <-- 页面 "${url}" 爬取失敗，正在报错...\n\n`)
-        throw err;
+// 设置cookie
+async function setCookie(page, cookies, verbose = false) {
+    if(verbose) console.log("\n>> 正在设置cookie...")
+    for (let cookie of cookies) {
+        // 如果cookie的value 属性为空, 直接跳过
+        if(!cookie.value){
+            if(verbose) console.log(`>> 跳过cookie: ${JSON.stringify(cookie)} 因为value为空.`);
+            continue;
+        }
+        await page.setCookie(sanitizeCookie(cookie, verbose));
     }
-    // console,log(data)
-    page.close(); // 关闭页面
-
-    return data;
 }
 
 
@@ -439,6 +450,28 @@ async function getFullHtml(browser, url)
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+
+// 处理cookie, 删除空属性
+// 因为 puppeteer 不能设置空属性的 cookie, 所以要删除空属性
+function sanitizeCookie(cookie, verbose = false) {
+    if(verbose) console.log(`\n>> 正在清理cookie: ${JSON.stringify(cookie)}`);
+    for (const key in cookie) {
+        if (cookie.hasOwnProperty(key)) {
+            if (cookie[key] === null || cookie[key] === undefined || cookie[key] === '') {
+                if(verbose) console.log(`>> 删除cookie中的 '${key}' 属性: 属性值为空.`);
+                // value 属性不能被删除, 否则会导致 puppeteer 报错, 所以这里跳过
+                if (key === 'value' && typeof cookie[key] !== 'string') {
+                    if(verbose) console.log(`>> 跳过 '${key}' 属性, 因为此属性必须存在且为string.`);
+                    continue;
+                }
+                delete cookie[key];
+            }
+        }
+    }
+    if(verbose) console.log(`\n>> cookie清理完成\n`);
+    return cookie;
 }
 
 // 递归查找目录下的所有hjson 文件中的bookSourceUrl 字段是否包含host

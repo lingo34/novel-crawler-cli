@@ -1,3 +1,4 @@
+// 此乃配置文件模版, 请勿随意修改
 {
     maxReloadCount: 2, // 最大重试次数
     maxRetryCount: 10, // 最大重试次数
