@@ -14,3 +14,5 @@ note.md
 ./debug.js
 xsbk
 cookie.json
+test-bench.js
+testCookie.js
