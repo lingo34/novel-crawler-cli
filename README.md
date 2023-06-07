@@ -97,6 +97,9 @@ node index.js
 
 获取到 json 格式的cookie 之后, 把它贴到本程序目录下的 `cookie.json` 文件中。如果这个文件不存在，就自己创建一个。
 
+如果你拿到的是一个长得像 `'newstatisticUUID=123456_56789876543; _csrfToken=7JHGYUi87yhj93ieuhd; fu=23432;'`的字符串，而不是一个JSON，你可以使用`script/
+cookieStrToStandardFormat.js`脚本 [gist](https://gist.github.com/lingo34/2c5546155f7d65cede8a0a6e10946e02)来将这种字符串转换成json cookie格式
+
 
 ## 目前进度
 目前本项目才刚刚起步, 支持网站有限, 有时新增不同网站时也会有一些bug, 不过大致框架基本已经完成, 已经可以开心的爬取小说了
