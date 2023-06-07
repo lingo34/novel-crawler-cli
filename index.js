@@ -4,11 +4,15 @@ const puppeteer = require('puppeteer');
 const prompt = require('prompt-sync')()
 var Hjson = require('hjson');
 
-const version = "1.0.1"
+const version = "1.0.2"
 
-const maxReloadCount = 2; // 最大重试次数
-const maxRetryCount = 10; // 最大重试次数
-const debug = false; // 是否开启debug模式, debug模式下会打印更多信息
+const config = Hjson.parse(fs.readFileSync('./config.hjson', 'utf8'));
+const maxReloadCount = config.maxReloadCount; // 最大重试次数
+const maxRetryCount = config.maxRetryCount; // 最大重试次数
+const debug = config.debug; // 是否开启debug模式, debug模式下会打印更多信息
+const browserLaunchOptions = config.browserLaunchOptions; // 启动浏览器的参数 
+
+// !dev const cookies = require('./cookie.json');
 
 main()
 
@@ -66,18 +70,7 @@ async function getBook(url, startIndex, endIndex, dir, bookSourceName, mergeable
 
     // 启动浏览器
     const browser = await puppeteer.launch(
-        {
-            // executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-            headless: "new", // true是无头模式, false是有gui, new 是新版无头
-            args: [
-                //  "--user-data-dir=./chromeTemp", // 保存登录状态
-                //  '--no-sandbox',
-                //  '--disable-setuid-sandbox',
-                //  '--disable-blink-features=AutomationControlled',
-            ],
-            // 将浏览器的输出信息打印到终端, debug 时推荐开启
-            dumpio: debug,
-        }
+        browserLaunchOptions
     )
 
 
@@ -188,6 +181,7 @@ async function getBook(url, startIndex, endIndex, dir, bookSourceName, mergeable
     // 爬取書籍內容
     // 控制浏览器打开新标签页面
     const page = await browser.newPage()
+    
     console.log("标签页已啟動, 开始爬取小说内容...")
 
     let lastPageData = null; // 上一章的页面
@@ -200,6 +194,12 @@ async function getBook(url, startIndex, endIndex, dir, bookSourceName, mergeable
             console.log(` url為: "${url}" index 為: ${pageNum}\n`)
             break;
         }
+
+        //!dev 设置每个cookie
+        // for (const cookie of cookies) {
+        //     await page.setCookie(cookie);
+        // }
+
         await page.goto(url).catch(err => {
             console.error(` #####! <-- ${dir} 第${pageNum}章 访问失败 !!!!!  退出程序...######`)
             console.log(` url為: ${url} index 為: ${pageNum}\n`)
