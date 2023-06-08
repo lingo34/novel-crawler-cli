@@ -4,7 +4,7 @@ const puppeteer = require('puppeteer');
 const prompt = require('prompt-sync')()
 var Hjson = require('hjson');
 
-const version = "1.0.3"
+const version = "1.0.4"
 
 const config = (function(filePath) 
 {
@@ -23,6 +23,7 @@ const config = (function(filePath)
 
 const maxReloadCount = config.maxReloadCount; // 最大重试次数
 const maxRetryCount = config.maxRetryCount; // 最大重试次数
+const defaultSaveDir = config.defaultSaveDir; // 默认保存目录
 const debug = config.debug; // 是否开启debug模式, debug模式下会打印更多信息
 const browserLaunchOptions = config.browserLaunchOptions; // 启动浏览器的参数 
 
@@ -62,9 +63,9 @@ async function main() {
     if (endIndex == '')
         endIndex = 2000;
 
-    let dir = prompt('請輸入小说存放資料夾(当前目录)/书名: ')
+    let dir = prompt(`請輸入小说存放資料夾(预设: ${defaultSaveDir})/书名: `)
     if (dir == '') {
-        dir = './'
+        dir = defaultSaveDir
     }
     let mergeable = prompt('请选择是否合并所有章节至单独文件?y/N(N)')
     if(mergeable === 'y' || mergeable === 'Y'){
@@ -158,6 +159,10 @@ async function getBook(url, startIndex, endIndex, dir, bookSourceName, mergeable
     if (dir[dir.length - 1] != "/") {
         dir += '/'
     }
+    if(!fs.existsSync(dir) || !fs.statSync(dir).isDirectory()){
+        console.log(`\n >> 資料夾不存在，将会自动创建此目录: (${dir})`)
+    }
+
     dir += bookname + '/' // 小说名稱資料夾
     console.log(`\n >> 小说将儲存到: (${dir})`)
 
