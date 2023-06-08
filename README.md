@@ -3,6 +3,10 @@
 
 > ⚠️ 本软件仅供学习使用，请在下载后24小时内删除
 
+# novel-crawler-cli
+<img src="https://img.shields.io/docker/image-size/lingo34/novel-crawler-cli?label=lingo34/novel-crawler-cli&logo=docker" href="https://hub.docker.com/repository/docker/lingo34/novel-crawler-cli/general">
+基于Node.js 与 Puppeteer 的纯命令行小说爬虫，支持多个网站，且可(相对)轻易添加更多网站的适配。由于puppeteer 是操作chromiun的无头浏览器，比其他方案更耗资源，但也更难被反爬虫机制检测到。
+
 ## 这是啥
 这是年轻人的第一个爬虫项目, 是一个基于Node.JS 与puppeteer的纯命令行软件，以爬取免费小说网站上的免费小说资源。
 
@@ -155,6 +159,7 @@ GitHub Copilot
 
 
 ## Docker
+Docker Hub: [lingo34/novel-crawler-cli](https://hub.docker.com/repository/docker/lingo34/novel-crawler-cli/general)
 
 ### 拉取镜像并运行:
 ~~~ sh
