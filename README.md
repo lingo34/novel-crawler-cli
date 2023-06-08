@@ -155,22 +155,47 @@ GitHub Copilot
 
 
 ## Docker
-~~~ sh
-docker build -t novel-crawler-cli .
 
-# or
+### 拉取镜像并运行:
+~~~ sh
+docker run -it \
+    --name novel-crawler-cli \
+    -v <output-path>:/app/output/ \
+    lingo34/novel-crawler-cli:latest
+~~~
+
+`-v <output-path>:/app/output/` 是小说输出目录，冒号左边是本机(修改这里)，右边是容器内(别动)
+可选项:
+`-v ./config.hjson:/app/config.hjson` 是可自定义的配置文件, 可以不加这行。
+`-v ./cookie.json:/app/cookie.json` 可以导入cookie文件, 可以不加这行
+
+### Build: 从源码构建docker 镜像
+首先先切到`docker` branch下
+
+~~~ sh
+# 使用最新的 buildx 工具
+docker buildx build \
+	-t novel-crawler-cli:latest\
+	.
+# 或部署给多平台
 docker buildx build \
 	--platform linux/amd64,linux/arm64, linux/arm/v7 \
 	-t novel-crawler-cli:latest\ #加你的tag
 	--push \ #build結束直接push到hub上去
 	.
----
-docker buildx build \
-	-t novel-crawler-cli:latest\
-	.
-
-
-docker run novel-crawler-cli -lt
 ~~~
 
+### 运行本地构建的镜像
+
+~~~ sh
+docker run -it \
+    --name novel-crawler-cli \
+    -v <output-path>:/app/output/ \
+    novel-crawler-cli
+~~~
+
+`-v <output-path>:/app/output/` 是小说输出目录，冒号左边是本机(修改这里)，右边是容器内(别动)
+可选项:
+`-v ./config.hjson:/app/config.hjson` 是可自定义的配置文件, 可以不加这行。
+`-v ./cookie.json:/app/cookie.json` 可以导入cookie文件, 可以不加这行
 
