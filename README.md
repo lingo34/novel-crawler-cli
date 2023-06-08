@@ -95,6 +95,10 @@ node index.js
 
 关于如何从浏览器中获取cookie, 可以使用像是[EditThisCookie](https://chrome.google.com/webstore/detail/editthiscookie/fngmhnnpilhplaeedifhccceomclgfbg) (chrome) 或是 [CookieEditor](https://addons.mozilla.org/zh-CN/firefox/addon/cookie-editor/) (FireFox)之类的插件。 看这篇文章 [Puppeteer cookie 使用，免登录 CSDN 简书 掘金](https://guozh.net/puppeteer-cookie-login/)
 
+> ⚠️ 但是我有必要提醒你，除非你已经做过code review，否则不要把这种具有 “存取您在所有网站的数据”或 “允许这个扩充功能读取及变更你在造访过的网站留下的所有资料” 权限的插件装在你的主浏览器中。并且，使用完记得删除。获取cookie/session token是非常敏感的权限，只要能获取cookie，程序就能在不知道你密码的状况下，以你的身份登入网站。另外，由于浏览器插件的权限管理机制，如果你在启用这种插件时在网站上输入了密码，插件也可以读取你输入的密码并传送给第三方。
+> 
+> 本程序只会在你的允许下，使用你输入的cookie进行你授权的自动登入。你的cookie只会留在你的电脑上(以及传送到你要登入的网站)。如果你不放心，请务必做code review。你不应该在你的电脑上执行任何不可信的代码。再说本程序也就几百行的node代码，而且写了一堆中文注释，读起来很快的。
+
 获取到 json 格式的cookie 之后, 把它贴到本程序目录下的 `cookie.json` 文件中。如果这个文件不存在，就自己创建一个。
 
 如果你拿到的是一个长得像 `'newstatisticUUID=123456_56789876543; _csrfToken=7JHGYUi87yhj93ieuhd; fu=23432;'`的字符串，而不是一个JSON，你可以使用`script/
