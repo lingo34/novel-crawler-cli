@@ -170,7 +170,7 @@ docker run -it \
 `-v ./cookie.json:/app/cookie.json` 可以导入cookie文件, 可以不加这行
 
 ### Build: 从源码构建docker 镜像
-首先先切到`docker` branch下
+
 
 ~~~ sh
 # 使用最新的 buildx 工具
