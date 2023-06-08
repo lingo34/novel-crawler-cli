@@ -11,7 +11,7 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
 WORKDIR /app
-# RUN addgroup app && adduser -S -G app app
+RUN addgroup app && adduser -S -G app app
 
 COPY ["package.json", "package-lock.json*", "./"]
 
