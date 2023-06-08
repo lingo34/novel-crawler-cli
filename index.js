@@ -28,8 +28,8 @@ const browserLaunchOptions = config.browserLaunchOptions; // 启动浏览器的�
 
 const cookies = (function(cookieFilePath) {
     // file exists and not empty
-    if((fs.existsSync()
-    && fs.statSync(cookieFilePath).isFile()) ||
+    if((fs.existsSync(cookieFilePath) &&
+    fs.statSync(cookieFilePath).isFile()) &&
     (fs.readFileSync(cookieFilePath, 'utf8').trim() != '')
     ){
         return require(cookieFilePath);
