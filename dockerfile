@@ -11,17 +11,16 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
 WORKDIR /app
-RUN addgroup app && adduser -S -G app app
-RUN chown -R app:app /app
+# RUN addgroup app && adduser -S -G app app
 
 COPY ["package.json", "package-lock.json*", "./"]
 
 RUN ["npm", "install"]
 COPY . /app
-
+RUN ["mkdir", "output"]
+RUN ["chown", "-R", "app:app", "/app"]
 USER app
 
-# CMD ["node", "index.js"]
-CMD ["sh"]
+CMD ["node", "index.js"]
 
 
