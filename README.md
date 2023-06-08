@@ -34,8 +34,8 @@
 
 找个资料夹, clone 一下这个repo
 ~~~ sh
-# clone 一下 这个repo
-https://github.com/lingo34/novel-crawler-cli
+# clone 一下 这个repo，或是直接下载源代码.zip然后解压
+git clone https://github.com/lingo34/novel-crawler-cli
 
 # 然后 npm install 一下
 npm install
