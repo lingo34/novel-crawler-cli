@@ -157,6 +157,19 @@ GitHub Copilot
 ## Docker
 ~~~ sh
 docker build -t novel-crawler-cli .
+
+# or
+docker buildx build \
+	--platform linux/amd64,linux/arm64, linux/arm/v7 \
+	-t novel-crawler-cli:latest\ #加你的tag
+	--push \ #build結束直接push到hub上去
+	.
+---
+docker buildx build \
+	-t novel-crawler-cli:latest\
+	.
+
+
 docker run novel-crawler-cli -lt
 ~~~
 
