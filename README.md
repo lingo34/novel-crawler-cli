@@ -1,6 +1,8 @@
 > :warning: If you don't understand Chinese, this repo is useless for you.
 > This program aims to crawl Chinese novel websites, so almost everything (like comments) is written in Chinese
 
+> ⚠️ 本软件仅供学习使用，请在下载后24小时内删除
+
 ## 这是啥
 这是年轻人的第一个爬虫项目, 是一个基于Node.JS 与puppeteer的纯命令行软件，以爬取免费小说网站上的免费小说资源。
 
@@ -19,9 +21,9 @@
 
 ## 一点点声明
 
-这个项目只是一个爬虫项目，爬取某些**免费小说**网站上的**免费**资源，此工具本身并*不*提供破解或是小说解锁功能。
+这个项目只是一个爬虫项目，本身并*不*提供破解或是小说解锁功能。
 
-所有本工具能爬取的数据皆为网络上的公开资料，如有版权纠纷，请联系数据来源。
+所有本工具能爬取的数据大多为网络上的公开资料，如有版权纠纷，请联系数据来源。
 
 ## 怎么用这玩意儿
 首先你需要
@@ -32,12 +34,13 @@
 
 找个资料夹, clone 一下这个repo
 ~~~ sh
-# clone 一下 这个repo
-https://github.com/lingo34/novel-crawler-cli
+# clone 一下 这个repo，或是直接下载源代码.zip然后解压
+git clone https://github.com/lingo34/novel-crawler-cli
 
 # 然后 npm install 一下
 npm install
 ~~~
+大约280mb 的chromium 浏览器会在此时被下载到程序目录下的 .cache文件夹，如果你希望使用自己的chrome，可以删除程序目录下的`.puppeteerrc.cjs`文件(参考[官方文档](https://pptr.dev/guides/configuration#changing-the-default-cache-directory))，并修改`const browser = await puppeteer.launch()`中的参数(参考[官方文档](https://pptr.dev/#default-runtime-settings)) (未来某个时候将会模块化成config.hjson文件，不过未来的事嘛，明天再说)
 
 然后再用node 执行 index.js
 ~~~sh
@@ -51,11 +54,12 @@ node index.js
 另外看到小说档案名前的数字了吗？重新开始时记得把那个数字设置为开始数字。这个数字与章节不一定相同。
 
 ## 解除安装
-几乎所有跟本程序相关的档案都只会出现在本程序的文件夹内，
-不过`puppeteer`会把`Chrome For Testing` 放在 `$HOME/.cache/puppeteer` (mac/linux/unix)
+几乎所有跟本程序相关的档案都只会出现在本程序的文件夹内，当然，如果你是为了跑这个程序才装的`node.js`, 记得把它给删了。
+不过如果你删除了`.puppeteerrc.cjs` 文件，`puppeteer`会把`Chrome For Testing` 放在 `$HOME/.cache/puppeteer` (mac/linux/unix)
 参考[官方文档](https://pptr.dev/#installation)
 
 ## Supported Websites 目前支持的网站
+如果你有想要添加的网站, 可以开个issue 或是联系我 `lingo34@skiff.com`, 我心情好而且很闲的时候就有机会加一下
 
 目前支持的网站
 | url | name | 书源档案 | 备注 |
@@ -64,6 +68,7 @@ node index.js
 | https://www.shukw.com/    | 书库网    | shukw-com.hjson        | |
 | https://www.bifengzw.com  | 东流小说  | bifengzw-com.hjson      | |
 | https://zh.wikisource.org | 维基文库  | zh-wikisource-org.hjson | 维基文库的格式十分复杂, 有时会有表格和图片这种本爬虫无法处理内容|
+| https://www.qidian.com/   | qd中文网  | www-qidian-com.hjson   | 这东西不太稳定, 很玄, 如果失败了就多试几次。支持cookie 登入|
 
 打算支持的网站
 - ...更多笔趣阁
@@ -84,6 +89,21 @@ node index.js
 由于储存格式为纯文本, 这个爬虫并不能爬取图片或表格等富文本信息, 或许有一天会添加表格或是将html 语法转换成markdown 格式的功能, 不过目前不在计划当中, 如果有人愿意的话请务必开个pr
 
 
+## 关于Cookie
+有些网站或许会要求登入, 而众所周知, cookie 是储存登入状态的好地方。
+所以只要从你的浏览器获取cookie, 再把cookie 导入到本程序里就可以了。
+
+关于如何从浏览器中获取cookie, 可以使用像是[EditThisCookie](https://chrome.google.com/webstore/detail/editthiscookie/fngmhnnpilhplaeedifhccceomclgfbg) (chrome) 或是 [CookieEditor](https://addons.mozilla.org/zh-CN/firefox/addon/cookie-editor/) (FireFox)之类的插件。 看这篇文章 [Puppeteer cookie 使用，免登录 CSDN 简书 掘金](https://guozh.net/puppeteer-cookie-login/)
+
+> ⚠️ 但是我有必要提醒你，除非你已经做过code review，否则不要把这种具有 “存取您在所有网站的数据”或 “允许这个扩充功能读取及变更你在造访过的网站留下的所有资料” 权限的插件装在你的主浏览器中。并且，使用完记得删除。获取cookie/session token是非常敏感的权限，只要能获取cookie，程序就能在不知道你密码的状况下，以你的身份登入网站。另外，由于浏览器插件的权限管理机制，如果你在启用这种插件时在网站上输入了密码，插件也可以读取你输入的密码并传送给第三方。
+> 
+> 本程序只会在你的允许下，使用你输入的cookie进行你授权的自动登入。你的cookie只会留在你的电脑上(以及传送到你要登入的网站)。如果你不放心，请务必做code review。你不应该在你的电脑上执行任何不可信的代码。再说本程序也就几百行的node代码，而且写了一堆中文注释，读起来很快的。
+
+获取到 json 格式的cookie 之后, 把它贴到本程序目录下的 `cookie.json` 文件中。如果这个文件不存在，就自己创建一个。
+
+如果你拿到的是一个长得像 `'newstatisticUUID=123456_56789876543; _csrfToken=7JHGYUi87yhj93ieuhd; fu=23432;'`的字符串，而不是一个JSON，你可以使用`script/
+cookieStrToStandardFormat.js`脚本 [gist](https://gist.github.com/lingo34/2c5546155f7d65cede8a0a6e10946e02)来将这种字符串转换成json cookie格式
+
 
 ## 目前进度
 目前本项目才刚刚起步, 支持网站有限, 有时新增不同网站时也会有一些bug, 不过大致框架基本已经完成, 已经可以开心的爬取小说了
@@ -93,6 +113,8 @@ node index.js
 
 - [x] ~~拆分并模块化html解析模块~~
 - [x] ~~弄一种匹配机制，如果是已适配的网站，直接用对应库~~
+- [x] ~~cookies 登入~~
+- [ ] 更新书源
 - [ ] 解决必须提供第一章url的问题, 或者说, 支持提供目录url
 - [ ] 写一个用来给书源debug 的程序, 只包含必要代码以及debug 工具
 - [ ] docker 支持
