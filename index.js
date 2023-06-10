@@ -4,7 +4,7 @@ const puppeteer = require('puppeteer');
 const prompt = require('prompt-sync')()
 var Hjson = require('hjson');
 
-const version = "1.0.4"
+const version = "1.0.5"
 
 const config = (function(filePath) 
 {
@@ -26,6 +26,7 @@ const maxRetryCount = config.maxRetryCount; // 最大重试次数
 const defaultSaveDir = config.defaultSaveDir; // 默认保存目录
 const debug = config.debug; // 是否开启debug模式, debug模式下会打印更多信息
 const browserLaunchOptions = config.browserLaunchOptions; // 启动浏览器的参数 
+const userAgent = config.userAgent; // 浏览器的userAgent
 
 const cookies = (function(cookieFilePath) {
     // file exists and not empty
@@ -210,6 +211,10 @@ async function getBook(url, startIndex, endIndex, dir, bookSourceName, mergeable
     // 爬取書籍內容
     // 控制浏览器打开新标签页面
     const page = await browser.newPage()
+
+    // 设置userAgent
+    if(userAgent)
+        await page.setUserAgent(userAgent)
 
     //设置cookie
     if(cookies)
