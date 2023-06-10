@@ -1,5 +1,5 @@
 {
-    version: "1.0.2", // 书源版本
+    version: "1.0.3", // 书源版本
 
 
     bookSourceName: "qd小说", // 书源名称
@@ -117,7 +117,7 @@
             // 如果本页是最后一页, 有些网站的下一页是null, 有些网站的下一页是回到目录页的链接
             // 这两种情况都是可以接受的, 不过如果下一页的url 为空, 记得直接读取.href 是会报错的, 要加个判断
         try{
-            nextPageUrl = document.querySelector('.nav-btn-group a:nth-child(3)').href; // 获取下一页的链接 
+            nextPageUrl = document.querySelector('div.nav-btn-group :last-child').href; // 获取下一页的链接 
         }
         catch(e){nextPageUrl = null}
 
