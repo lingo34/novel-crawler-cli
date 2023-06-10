@@ -5,6 +5,7 @@ xsbk
 lab
 chromeTemp
 .cache
+output
 
 # debug files
 lab.js
