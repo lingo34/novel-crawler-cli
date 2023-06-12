@@ -1,5 +1,6 @@
 // 此乃配置文件模版, 请勿随意修改
 {
+    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
     maxReloadCount: 2, // 最大重试次数
     maxRetryCount: 10, // 最大重试次数
     defaultSaveDir: "./output/", // 默认保存位置
