@@ -5,6 +5,7 @@
 
 # novel-crawler-cli
 <a href="https://hub.docker.com/repository/docker/lingo34/novel-crawler-cli/general"><img src="https://img.shields.io/docker/image-size/lingo34/novel-crawler-cli?label=lingo34/novel-crawler-cli&logo=docker"></a>
+
 基于Node.js 与 Puppeteer 的纯命令行小说爬虫，支持多个网站，且可(相对)轻易添加更多网站的适配。由于puppeteer 是操作chromium的无头浏览器，比其他方案更耗资源，但也更难被反爬虫机制检测到。
 
 
@@ -36,7 +37,8 @@
 1. 命令行
 2. Node.js (开发用的是v20.0.0, 其他版本没测试但应该问题不大吧...)
 3. npm (装node.js 时会一起获得)
-4. 一个chrome 浏览器? 这我还要实验, 不过有总比没有好...
+
+> ⚠️ Linux 环境下安装有大古怪，建议使用docker或参考我在dockerfile中写的安装方式
 
 找个资料夹, clone 一下这个repo
 ~~~ sh
@@ -46,7 +48,7 @@ git clone https://github.com/lingo34/novel-crawler-cli
 # 然后 npm install 一下
 npm install
 ~~~
-大约280mb 的chromium 浏览器会在此时被下载到程序目录下的 .cache文件夹，如果你希望使用自己的chrome，可以删除程序目录下的`.puppeteerrc.cjs`文件(参考[官方文档](https://pptr.dev/guides/configuration#changing-the-default-cache-directory))，并修改`const browser = await puppeteer.launch()`中的参数(参考[官方文档](https://pptr.dev/#default-runtime-settings)) (未来某个时候将会模块化成config.hjson文件，不过未来的事嘛，明天再说)
+大约280mb 的chromium 浏览器会在此时被下载到程序目录下的 .cache文件夹，如果你希望使用自己的chrome，可以删除程序目录下的`.puppeteerrc.cjs`文件(参考[官方文档](https://pptr.dev/guides/configuration#changing-the-default-cache-directory))，并修改`config.hjson`中的`executablePath`参数, 参考[官方文档](https://pptr.dev/#default-runtime-settings)
 
 然后再用node 执行 index.js
 ~~~sh
