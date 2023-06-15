@@ -8,7 +8,7 @@
 
 基于Node.js 与 Puppeteer 的纯命令行小说爬虫，支持多个网站，且可(相对)轻易添加更多网站的适配。由于puppeteer 是操作chromium的无头浏览器，比其他方案更耗资源，但也更难被反爬虫机制检测到。
 
-
+https://github.com/lingo34/novel-crawler-cli/assets/131832524/08881f85-b1de-4ddb-b060-728f38e82565
 
 ## 这是啥
 这是年轻人的第一个爬虫项目, 是一个基于Node.JS 与puppeteer的纯命令行软件，以爬取免费小说网站上的免费小说资源。
