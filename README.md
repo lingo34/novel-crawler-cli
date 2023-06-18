@@ -5,6 +5,8 @@
 
 # novel-crawler-cli
 <a href="https://hub.docker.com/repository/docker/lingo34/novel-crawler-cli/general"><img src="https://img.shields.io/docker/image-size/lingo34/novel-crawler-cli?label=lingo34/novel-crawler-cli&logo=docker"></a>
+<a href="https://t.me/+akoDsm2PIZ8xM2Vh"><img src="https://img.shields.io/badge/Telegram-Channel-blue"></a>
+
 
 基于Node.js 与 Puppeteer 的纯命令行小说爬虫，支持多个网站，且可(相对)轻易添加更多网站的适配。由于puppeteer 是操作chromium的无头浏览器，比其他方案更耗资源，但也更难被反爬虫机制检测到。
 
