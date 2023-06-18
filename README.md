@@ -35,12 +35,16 @@ https://github.com/lingo34/novel-crawler-cli/assets/131832524/08881f85-b1de-4ddb
 所有本工具能爬取的数据大多为网络上的公开资料，如有版权纠纷，请联系数据来源。
 
 ## 怎么用这玩意儿
+
+### 你需要什么
 首先你需要
 1. 命令行
 2. Node.js (开发用的是v20.0.0, 其他版本没测试但应该问题不大吧...)
 3. npm (装node.js 时会一起获得)
 
 > ⚠️ Linux 环境下安装有大古怪，建议使用docker或参考我在dockerfile中写的安装方式
+
+### 安装
 
 找个资料夹, clone 一下这个repo
 ~~~ sh
@@ -52,12 +56,25 @@ npm install
 ~~~
 大约280mb 的chromium 浏览器会在此时被下载到程序目录下的 .cache文件夹，如果你希望使用自己的chrome，可以删除程序目录下的`.puppeteerrc.cjs`文件(参考[官方文档](https://pptr.dev/guides/configuration#changing-the-default-cache-directory))，并修改`config.hjson`中的`executablePath`参数, 参考[官方文档](https://pptr.dev/#default-runtime-settings)
 
-然后再用node 执行 index.js
+### 国内环境的大古怪
+如果你在墙内，运行`npm install` 或第一次运行程序时有可能会因为不可抗力的原因失败。
+这个时候，就先运行下面这段命令吧
+~~~sh
+PUPPETEER_DOWNLOAD_HOST=https://storage.googleapis.com.cnpmjs.org npm install puppeteer
+~~~
+参考[国内下载安装 Puppeteer 的方法](https://brickyang.github.io/2019/01/14/%E5%9B%BD%E5%86%85%E4%B8%8B%E8%BD%BD%E5%AE%89%E8%A3%85-Puppeteer-%E7%9A%84%E6%96%B9%E6%B3%95/)
+
+
+### 运行
+
+用node 执行 index.js
 ~~~sh
 node index.js
 ~~~
 
 就可以了
+
+### 一些别的
 
 关于开始章节网址，请输入第一章的网址。我能搞到目录的地址，但搞不到第一章的地址。
 如果你打算从某一章开始爬取，比如第30章(可能是因为之前爬一半中断了)， 直接写第30章的地址。
