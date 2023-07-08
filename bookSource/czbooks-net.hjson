@@ -1,0 +1,138 @@
+{
+    version: "1.0.3", // 书源版本
+
+
+    bookSourceName: "小說狂人", // 书源名称
+    bookSourceUrl: "https://czbooks.net", // 书源网站地址
+
+    note: "", // 书源备注信息, 会在启动书源时显示, 可以留空
+
+    // homeUrl: "https://www.www.qidian.com/read/{bookid}", // 书源网站的目录页地址, 用于跳转至目录页
+
+
+    // https://www.bifengzw.com/
+    // https://www.bifengzw.com/read/AgZZBQVd.html
+
+    // 尚不支持搜索
+    //searchUrl: "", // 书源网站的搜索页地址, 用于跳转至搜索页
+    //bookUrl: "https://www.bifengzw.com/read/{bookId}/",
+
+    // ======== 工具函数 ========
+
+    // 从章节url 中提取 bookid 的正则表达式
+    // 如果这个函数出错, 会导致无法正确的获得book id, 导致无法跳转至目录页, 并在获取小说信息时报错
+    getBookID:
+    {
+        arguments:"url", // 传入的参数, 第一章或某一章的url, 请不要动这玩意儿
+        body:
+        //! 修改下面的代码, 以适配你的网站
+        // 此处错误的话, 可能会导致无法正确的获得book id, 导致无法跳转至目录页, 并在获取小说信息时报错
+        '''
+            // 此处是函数体, 本函数应该从传入的参数: url, 即章节url中, 
+            // 提取 book id 并回传
+            return url.match(/https:\/\/czbooks\.net\/n\/([^/]+)/)[1];
+        '''
+
+    },
+    
+    // 从book id 获取 homeUrl 的函数
+    getHomeUrl:
+    {
+        arguments: "bookid",
+        body:
+        //! 修改下面的代码, 以适配你的网站
+        // 此处错误的话, 会无法正确的根据book id获取并跳转至目录页, 并在获取小说信息时报错
+        '''
+            // 把homeUrl 改成你的网站的目录页地址,
+            let homeUrl = "https://czbooks.net/n/" + bookid;
+            return homeUrl;
+        '''
+    },
+
+    // 将获取到的小说正文(content)内容进行处理, 格式化的函数,
+    formatContentText:
+    {
+        arguments: "content",
+        body:
+        //? 如果小说正文长得很奇怪, 比如包含广告, 可以修改下面的代码, 来格式化小说正文
+        '''
+            // 本函数用于处理获取到的小说正文内容, 例如去除广告, 去除多余的空行等等
+            // 本函数应该透过解析传入的参数: content, 即小说正文内容, 
+            // 来处理并回传处理后的小说正文内容
+
+            // 删除首尾空白
+            content = content.trim();
+            // 將 &nbsp; 轉換為空格
+            content = content.replace(/&nbsp;/g, "");
+
+            return content;
+        '''
+    }
+
+    // ======== Evaluate 函数 - 用于分析网页 ========
+
+    // 从小说目录页获取书籍信息
+    getBookInfo:
+    {
+        arguments:"document", // 传入的参数, 是从evaluate那边获取的页面的document 对象, 请不要动这玩意儿
+        body:
+        //! 修改下面的代码, 以适配你的网站
+        // 小提示: 不要在这里使用 console.log, 这会让程序变得很不稳定, 还有, 你看不见他的输出
+        '''
+            // 此处是函数体, 这里存放爬虫代码, 需要使用 document (就是浏览器中的document对象) 以及css 选择器来获取数据
+            // 获取并透过 return 返回以下数据: {bookname, img, author, intro} 
+            let bookname = document.querySelector('.info .title').textContent.replace(/^《|》$/g, ''); // 获取小说名字
+            let img = document.querySelector('.novel-detail .thumbnail img').src; // 获取小说封面
+            let author = document.querySelector('.novel-detail .info .author a').textContent; // 获取小说作者
+            let intro = document.querySelector('.novel-detail .description').textContent; // 获取小说简介
+            return {bookname, img, author, intro}
+            
+        '''
+
+    },
+
+    // 从小说正文页获取章节内容
+    getContent:
+    {
+        arguments:"document", // 传入的参数, 是从evaluate那边获取的页面的document 对象, 请不要动这玩意儿
+        body: 
+        //! 修改下面的代码, 以适配你的网站
+        // 小提示: 不要在这里使用 console.log, 这会让程序变得很不稳定, 还有, 你看不见他的输出
+        '''
+        let content = null;
+        let title = null;
+        let nextPageUrl = null;
+
+         
+        try{
+            // 获取小说内容 
+            content = document.querySelector('.content').textContent;
+        }
+        catch(e){content = null}
+
+        try{
+            // 获取小说标题 
+            title = document.querySelector('.chapter-detail .name').textContent;
+        }
+        catch(e){title = null}
+
+            // 如果本页是最后一页, 有些网站的下一页是null, 有些网站的下一页是回到目录页的链接
+            // 这两种情况都是可以接受的, 不过如果下一页的url 为空, 记得直接读取.href 是会报错的, 要加个判断
+        try{
+            nextPageUrl = document.querySelector('.nav .next-chapter').href; // 获取下一页的链接 
+        }
+        catch(e){nextPageUrl = null}
+
+            return {content, title, nextPageUrl} 
+        ''', // 函数体, 这里存放 爬虫代码, 需要使用 document (就是浏览器中的document对象) 以及css 选择器来获取数据
+            // 获取并透过 return 返回以下数据: (content, title, nextPageUrl)
+    }
+
+    // 测试函数, 用于测试
+    "test":
+    {
+        "arguments":"document",
+        "body":"console.log('hey jojo! ' + document); return 'Hello, ' + document;"
+    }
+
+}
