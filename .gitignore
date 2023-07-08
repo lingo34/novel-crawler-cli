@@ -1,19 +1,16 @@
 
+# should not be uploaded to github
 .DS_Store
 node_modules
 xsbk
-lab
 chromeTemp
 .cache
 output
+cookie.json
 
 # debug files
 lab.js
-22.js
-jianshu.png
-note.md
-./debug.js
 xsbk
-cookie.json
-test-bench.js
-testCookie.js
+test-*
+debug-*
+jianshu.png
