@@ -94,6 +94,7 @@ node index.js
 目前支持的网站
 | url | name | 书源档案 | 备注 |
 | --- | ---- | ------ | ---- |
+| https://www.69shuba.com/  | 69书吧    | 69shuba-com.hjson	| |
 | https://www.xbiquge.tw/   | 笔趣阁    | xbiquge-tw.hjson       | |
 | https://www.shukw.com/    | 书库网    | shukw-com.hjson        | |
 | https://www.bifengzw.com  | 东流小说  | bifengzw-com.hjson      | |
