@@ -58,6 +58,7 @@
             content = content.trim();
             // 將 &nbsp; 轉換為空格
             content = content.replace(/&nbsp;/g, "");
+            content = content.replace("\n\n  ", "\n\n");
 
             return content;
         '''
