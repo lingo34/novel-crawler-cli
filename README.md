@@ -173,6 +173,8 @@ chatGPT & Bing GPT
 GitHub Copilot
 - 帮我写了剩下 1/3 的代码
 
+~~所以四舍五入就是我根本没写代码，有版权纠纷别找我~~
+
 ## 使用的 Library
 - puppeteer, Apache 2.0 协议
 - prompt-sync, mit 协议
